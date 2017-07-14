@@ -20,10 +20,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.LruCache;
 import android.util.Size;
+import android.view.Surface;
 import android.view.TextureView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -69,21 +71,22 @@ public class MainActivity extends AppCompatActivity {
     private CameraDevice.StateCallback mCameraDeviceStateCallback =
             new CameraDevice.StateCallback() {
                 @Override
-                public void onOpened(CameraDevice camera) {
+                public void onOpened(@NonNull CameraDevice camera) {
                     mCameraDevice = camera;
-                    Toast.makeText(getApplicationContext(), "CameraDevice Opened", Toast.LENGTH_LONG).show();
+                    createCameraPreviewSession();
+                    //Toast.makeText(getApplicationContext(), "CameraDevice Opened", Toast.LENGTH_LONG).show();
 
                 }
 
                 @Override
-                public void onDisconnected(CameraDevice camera) {
+                public void onDisconnected(@NonNull CameraDevice camera) {
                     camera.close();
                     mCameraDevice = null;
 
                 }
 
                 @Override
-                public void onError(CameraDevice camera, int error) {
+                public void onError(@NonNull CameraDevice camera, int error) {
                     camera.close();
                     mCameraDevice = null;
                     Toast.makeText(getApplicationContext(), "That's an error!", Toast.LENGTH_LONG).show();
@@ -92,6 +95,11 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             };
+
+    private CaptureRequest mPreviewCaptureRequest;
+    private CaptureRequest.Builder mPreviewCaptureRequestBuilder;
+    private CameraCaptureSession mCameraCaptureSession;
+    private CameraCaptureSession.CaptureCallback mSessionCaptureCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -176,6 +184,50 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+    }
+
+    private void createCameraPreviewSession() {
+        try {
+            SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
+            surfaceTexture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+            Surface previewSurface = new Surface(surfaceTexture);
+            mPreviewCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            mPreviewCaptureRequestBuilder.addTarget(previewSurface);
+            mCameraDevice.createCaptureSession(Arrays.asList(previewSurface),
+                    new CameraCaptureSession.StateCallback() {
+                        @Override
+                        public void onConfigured(@NonNull CameraCaptureSession session) {
+                            if(mCameraDevice == null) {
+                                return;
+                            }
+                            try {
+                                mPreviewCaptureRequest = mPreviewCaptureRequestBuilder.build();
+                                mCameraCaptureSession = session;
+                                mCameraCaptureSession.setRepeatingRequest(
+                                        mPreviewCaptureRequest,
+                                        mSessionCaptureCallback,
+                                        null
+                                ); //also runs on UI thread, can be optimised (replace null with something else)
+
+                            } catch (CameraAccessException e){
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
+                            Toast.makeText(
+                                    getApplicationContext(),
+                                    "create camera session failed!",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+
+                        }
+                    }, null);
+
+        } catch (CameraAccessException e){
+            e.printStackTrace();
+        }
     }
 
 /*    //Requesting permission
