@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         while (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION);
-            Toast.makeText(getApplicationContext(), "No Permission!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "No Permission, dude!", Toast.LENGTH_SHORT).show();
 
         }
         try {
