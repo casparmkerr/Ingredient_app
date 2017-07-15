@@ -12,6 +12,7 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager; */
 import android.hardware.camera2.*;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.os.HandlerThread;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -23,12 +24,14 @@ import android.util.Size;
 import android.view.Surface;
 import android.view.TextureView;
 import android.widget.Toast;
+import android.os.Handler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+//import java.util.logging.Handler;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -101,6 +104,9 @@ public class MainActivity extends AppCompatActivity {
     private CameraCaptureSession mCameraCaptureSession;
     private CameraCaptureSession.CaptureCallback mSessionCaptureCallback;
 
+    private HandlerThread mBackgroundThread;
+    private Handler mBackgroundHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,11 +119,24 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        if (mTextureView.isAvailable()) {
+        openBackgroundThread();
 
+        if (mTextureView.isAvailable()) {
+            setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
+            openCamera();
         } else {
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         }
+    }
+
+    @Override
+    public void onPause(){
+
+
+        closeCamera();
+
+        closeBackgroundThread();
+        super.onPause();
     }
 
     private void setupCamera(int width, int height) {
@@ -178,12 +197,23 @@ public class MainActivity extends AppCompatActivity {
         }
         try {
 
-            cameraManager.openCamera(mCameraId, mCameraDeviceStateCallback, null); //This can be optimised by running it on a separate thread, but that comes later
+            cameraManager.openCamera(mCameraId, mCameraDeviceStateCallback, mBackgroundHandler); //Fixed to run on background thread
 
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private void closeCamera() {
+        if (mCameraCaptureSession != null) {
+            mCameraCaptureSession.close();
+            mCameraCaptureSession = null;
+        }
+        if (mCameraDevice != null) {
+            mCameraDevice.close();
+            mCameraDevice = null;
+        }
     }
 
     private void createCameraPreviewSession() {
@@ -206,8 +236,8 @@ public class MainActivity extends AppCompatActivity {
                                 mCameraCaptureSession.setRepeatingRequest(
                                         mPreviewCaptureRequest,
                                         mSessionCaptureCallback,
-                                        null
-                                ); //also runs on UI thread, can be optimised (replace null with something else)
+                                        mBackgroundHandler
+                                ); //Fixed to run on background thread
 
                             } catch (CameraAccessException e){
                                 e.printStackTrace();
@@ -227,6 +257,25 @@ public class MainActivity extends AppCompatActivity {
 
         } catch (CameraAccessException e){
             e.printStackTrace();
+        }
+    }
+
+    private void openBackgroundThread() {
+        mBackgroundThread = new HandlerThread("Camera2 background thread");
+        mBackgroundThread.start();
+        mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
+    }
+
+    private void closeBackgroundThread() {
+        mBackgroundThread.quitSafely();
+        try {
+            mBackgroundThread.join();
+            mBackgroundThread = null;
+            mBackgroundHandler = null;
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+
         }
     }
 
