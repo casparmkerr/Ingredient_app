@@ -104,7 +104,7 @@ public class ImportPhotoActivity extends AppCompatActivity {
                 OcrEngine.setValues(filePath);
                 String text = OcrEngine.getValues();
                 System.out.println("Read text: " + text);
-                Toast.makeText(getApplicationContext(),text, Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(),text, Toast.LENGTH_LONG).show();
             }
         }
     }
