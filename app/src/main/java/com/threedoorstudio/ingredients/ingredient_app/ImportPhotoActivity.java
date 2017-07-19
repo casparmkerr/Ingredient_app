@@ -19,10 +19,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.List;
 
 public class ImportPhotoActivity extends AppCompatActivity {
 
@@ -30,11 +34,13 @@ public class ImportPhotoActivity extends AppCompatActivity {
 
     private String selectedImagePath;
     private String imgPath;
-    private ImageView img;
+    private ImageView mImg;
+    private TextView textView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_import_photo);
 
         int permissionCheck = ContextCompat.checkSelfPermission(this,
@@ -50,7 +56,7 @@ public class ImportPhotoActivity extends AppCompatActivity {
 
 
 
-        img = (ImageView)findViewById(R.id.imageView1);
+        textView = (TextView) findViewById(R.id.textView);
 
         ((Button) findViewById(R.id.add_photo_choose_photo))
                 .setOnClickListener(new View.OnClickListener() {
@@ -58,11 +64,10 @@ public class ImportPhotoActivity extends AppCompatActivity {
                         Intent intent = new Intent();
                         intent.setType("image/*");
                         intent.setAction(Intent.ACTION_GET_CONTENT);
-                        startActivityForResult(Intent.createChooser(intent,"Select Picture"), SELECT_PICTURE);
+                        startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
                     }
                 });
     }
-
 
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -74,14 +79,14 @@ public class ImportPhotoActivity extends AppCompatActivity {
                 // Split at colon, use second item in the array
                 String id = wholeID.split(":")[1];
 
-                String[] column = { MediaStore.Images.Media.DATA };
+                String[] column = {MediaStore.Images.Media.DATA};
 
                 // where id is equal to
                 String sel = MediaStore.Images.Media._ID + "=?";
 
                 Cursor cursor = getContentResolver().
                         query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                column, sel, new String[]{ id }, null);
+                                column, sel, new String[]{id}, null);
 
                 String filePath = "";
 
@@ -92,128 +97,31 @@ public class ImportPhotoActivity extends AppCompatActivity {
                 }
                 cursor.close();
 
-
-                /*
-                Uri selectedImageUri = data.getData();
-                selectedImagePath = getPath(selectedImageUri);
-                System.out.println("Image Path : " + selectedImagePath);
-                imgPath = data.getData().toString();
-                System.out.println("imgPath : " + imgPath);
-                img.setImageURI(selectedImageUri);*/
                 System.out.println("filePath : " + filePath);
                 OcrEngine.setValues(filePath);
                 String text = OcrEngine.getValues();
                 System.out.println("Read text: " + text);
-                Toast.makeText(getApplicationContext(),text, Toast.LENGTH_LONG).show();
-            }
-        }
-    }
+                Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
 
-    /*public String getPath(Uri uri) {
-        // just some safety built in
-        if (uri == null) {
-            return null;
-        }
-        // try to retrieve the image from the media store first
-        // this will only work for images selected from gallery
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = managedQuery(uri, projection, null, null, null);
-        if (cursor != null) {
-            int column_index = cursor
-                    .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        }
-        // this is our fallback here
-        return uri.getPath();
-    }
-    void doCreatePath()
-    {
 
-        try {
-
-            Uri originalUri = filePath;
-            String pathsegment[] = originalUri.getLastPathSegment().split(":");
-            String id = pathsegment[0];
-            final String[] imageColumns = {MediaStore.Images.Media.DATA};
-            final String imageOrderBy = null;
-            Uri uri = getUri();
-            Cursor imageCursor = getActivity().getContentResolver().query(uri, imageColumns,
-                    null, null, null);
-
-            if (imageCursor.moveToFirst()) {
-                int column_index_data = imageCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                realPath = imageCursor.getString(column_index_data);
-                System.out.print("value" + realPath);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
+                mImg = (ImageView) findViewById(R.id.imageView1);
+                Bitmap bmp = OcrEngine.getBitmap();
+                mImg.setImageBitmap(bmp);
 
 
 
+                List<String> wordsList = OcrEngine.getWords();
+                textView.setText("");
+                for (String word : wordsList) {
+                    textView.append(word + ", ");
 
-
-
-
-
-
-
-    /*
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_import_photo);
-
-        Button btn_choose_photo = (Button) findViewById(R.id.add_photo_choose_photo); // Replace with id of your button.
-        btn_choose_photo.setOnClickListener(btnChoosePhotoPressed);
-
-    }
-
-    public View.OnClickListener btnChoosePhotoPressed = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Intent i = new Intent(Intent.ACTION_PICK,
-                    android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-            final int ACTIVITY_SELECT_IMAGE = 1234;
-            startActivityForResult(i, ACTIVITY_SELECT_IMAGE);
-        }
-    };
-
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        switch(requestCode) {
-            case 1234:
-                if(resultCode == RESULT_OK){
-                    Uri selectedImage = data.getData();
-                    String[] filePathColumn = {MediaStore.Images.Media.DATA};
-
-                    Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-                    cursor.moveToFirst();
-
-                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                    String filePath = cursor.getString(columnIndex);
-                    cursor.close();
-
-                    Bitmap bmp = BitmapFactory.decodeFile(filePath);
-                    //OcrEngine ocrEngine = new OcrEngine(this);
-                    OcrEngine.setValues(bmp);
-
-                    String text = OcrEngine.getValues();
-                    Toast.makeText(this, text, Toast.LENGTH_LONG).show();
-
-
-
-            /* Now you have choosen image in Bitmap format in object "yourSelectedImage". You can use it in way you want!
                 }
+
+
+
+
+            }
         }
-
-    }; */
-
-
+    }
 }
+

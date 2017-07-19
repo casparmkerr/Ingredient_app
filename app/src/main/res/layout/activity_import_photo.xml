@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.threedoorstudio.ingredients.ingredient_app.ImportPhotoActivity"
-    android:theme="@style/AppTheme">
+    android:theme="@style/AppTheme.NoActionBar">
 
     <Button
         android:id="@+id/add_photo_choose_photo"
@@ -20,9 +20,18 @@
 
     <ImageView
         android:id="@+id/imageView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:srcCompat="@drawable/common_full_open_on_phone"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="300dp"
+        android:layout_height="280dp"
+        android:layout_above="@+id/add_photo_choose_photo"
+        android:layout_centerInParent="true"
         android:layout_centerVertical="true"
-        app:srcCompat="@drawable/common_full_open_on_phone" />
+        android:textColor="@color/WHITE"/>
 </RelativeLayout>

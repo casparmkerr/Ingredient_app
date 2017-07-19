@@ -857,12 +857,12 @@ public class Camera2BasicFragment extends Fragment
                     showToast("Saved: " + mFile);
                     Log.d(TAG, mFile.toString());
                     unlockFocus();
-                    //OcrEngine ocrEngine = new OcrEngine(this.getApplicationContext());
-                    OcrEngine ocrEngine = new OcrEngine(activity);
-                    //ocrEngine.setValues(path);
 
-                    //String string = ocrEngine.getValues();
-                    //showToast(string);
+                    //OcrEngine ocrEngine = new OcrEngine(activity);
+                    OcrEngine.setValues(path); //If this path doesn't work, try technique from ImportPhotoActivity
+
+                    String string = OcrEngine.getValues();
+                    showToast(string);
 
                 }
             };
