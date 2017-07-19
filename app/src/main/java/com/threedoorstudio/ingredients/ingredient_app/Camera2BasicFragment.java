@@ -26,6 +26,7 @@ package com.threedoorstudio.ingredients.ingredient_app;
         import android.app.Fragment;
         import android.content.Context;
         import android.content.DialogInterface;
+        import android.content.Intent;
         import android.content.pm.PackageManager;
         import android.content.res.Configuration;
         import android.graphics.ImageFormat;
@@ -46,6 +47,7 @@ package com.threedoorstudio.ingredients.ingredient_app;
         import android.media.Image;
         import android.media.ImageReader;
         import android.os.Bundle;
+        import android.os.Environment;
         import android.os.Handler;
         import android.os.HandlerThread;
         import android.support.annotation.NonNull;
@@ -73,6 +75,8 @@ package com.threedoorstudio.ingredients.ingredient_app;
         import java.util.concurrent.Semaphore;
         import java.util.concurrent.TimeUnit;
 
+
+
 public class Camera2BasicFragment extends Fragment
         implements View.OnClickListener, FragmentCompat.OnRequestPermissionsResultCallback {
 
@@ -89,6 +93,7 @@ public class Camera2BasicFragment extends Fragment
         ORIENTATIONS.append(Surface.ROTATION_180, 270);
         ORIENTATIONS.append(Surface.ROTATION_270, 180);
     }
+
 
     /**
      * Tag for the {@link Log}.
@@ -130,6 +135,10 @@ public class Camera2BasicFragment extends Fragment
      */
     private static final int MAX_PREVIEW_HEIGHT = 1080;
 
+
+    private String path;
+
+
     /**
      * {@link TextureView.SurfaceTextureListener} handles several lifecycle events on a
      * {@link TextureView}.
@@ -157,6 +166,8 @@ public class Camera2BasicFragment extends Fragment
         }
 
     };
+
+
 
     /**
      * ID of the current {@link CameraDevice}.
@@ -367,6 +378,8 @@ public class Camera2BasicFragment extends Fragment
         }
     }
 
+
+
     /**
      * Given {@code choices} of {@code Size}s supported by a camera, choose the smallest one that
      * is at least as large as the respective texture view size, and that is at most as large as the
@@ -436,7 +449,11 @@ public class Camera2BasicFragment extends Fragment
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mFile = new File(getActivity().getExternalFilesDir(null), "pic.jpg");
+        String timeStamp = String.valueOf(System.currentTimeMillis());
+        String fileName = timeStamp + ".jpg";
+        mFile = new File(getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES), fileName);
+        path = Environment.DIRECTORY_PICTURES + "/" + fileName;
+
     }
 
     @Override
@@ -840,9 +857,16 @@ public class Camera2BasicFragment extends Fragment
                     showToast("Saved: " + mFile);
                     Log.d(TAG, mFile.toString());
                     unlockFocus();
+                    //OcrEngine ocrEngine = new OcrEngine(this.getApplicationContext());
+                    OcrEngine ocrEngine = new OcrEngine(activity);
+                    //ocrEngine.setValues(path);
+
+                    //String string = ocrEngine.getValues();
+                    //showToast(string);
+
                 }
             };
-
+            //OcrEngine.setValues(path);
             mCaptureSession.stopRepeating();
             mCaptureSession.capture(captureBuilder.build(), CaptureCallback, null);
         } catch (CameraAccessException e) {

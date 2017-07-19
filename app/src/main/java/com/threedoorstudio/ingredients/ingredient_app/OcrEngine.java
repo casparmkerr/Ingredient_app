@@ -4,7 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
+import android.support.v7.app.AlertDialog;
 import android.util.SparseArray;
+import android.widget.Toast;
 
 
 import com.google.android.gms.common.ConnectionResult;
@@ -25,32 +27,65 @@ import java.io.File;
 public class OcrEngine {
 
 
-    Context c;
-    Frame frame;
-    String text1;
 
-    SparseArray text = new SparseArray();
-    void setValues(Context context, String PathToFileString) {
+
+    static Context c;
+    Frame frame;
+    static String text1;
+    static String detectedText;
+
+
+
+    //SparseArray text = new SparseArray();
+
+    public OcrEngine(Context context) {
         c = context;
+    }
+
+    static void setValues(String PathToFileString) {
+
 
         Bitmap bmp = BitmapFactory.decodeFile( PathToFileString );
+        if (bmp == null) {
+            Toast.makeText(c, "Null Bitmap!", Toast.LENGTH_LONG).show();
+        }
         TextRecognizer textRecognizer = new TextRecognizer.Builder(c).build();
         Frame outputFrame = new Frame.Builder().setBitmap(bmp).build();
-        /*Detector detector = new Detector() {
+        Detector detector = new Detector() {
             @Override
             public SparseArray detect(Frame frame) {
                 return null;
             }
-        };*/
+        };
+        if (!textRecognizer.isOperational()) {
+            Toast.makeText(c, "Text Recognizer not operational", Toast.LENGTH_LONG);
+            System.out.println("Text Recognizer not operational");
+            new AlertDialog.Builder(c)
+                    .setMessage("Text recognizer could not be set up on your device :(").show();
+            return;
+        }
         //SparseArray<TextBlock> text = detector.detect(frame);
-        SparseArray<TextBlock> block = textRecognizer.detect(outputFrame);
-        text1 = block.toString();
+        SparseArray<TextBlock> text = textRecognizer.detect(outputFrame);
+        //text1 = block.toString();
+        for (int i = 0; i < text.size(); i++) {
+            TextBlock textBlock = text.valueAt(i);
+            if (textBlock != null && textBlock.getValue() != null) {
+                detectedText += textBlock.getValue();
+            }
+        }
+        //detectedTextView.setText(detectedText);
+        System.out.println("Text: " + detectedText);
+        textRecognizer.release();
 
 
     }
 
-    String getValues() {
-        return text1;
+    static String getValues() {
+        if (detectedText != null) {
+            return detectedText;
+        } else {
+            return "No text";
+        }
     }
 
 
