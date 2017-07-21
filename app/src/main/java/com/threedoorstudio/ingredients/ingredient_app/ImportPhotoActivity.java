@@ -35,7 +35,7 @@ public class ImportPhotoActivity extends AppCompatActivity {
     private String selectedImagePath;
     private String imgPath;
     private ImageView mImg;
-    private TextView textView;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,7 +56,7 @@ public class ImportPhotoActivity extends AppCompatActivity {
 
 
 
-        textView = (TextView) findViewById(R.id.textView);
+
 
         ((Button) findViewById(R.id.add_photo_choose_photo))
                 .setOnClickListener(new View.OnClickListener() {
@@ -111,7 +111,8 @@ public class ImportPhotoActivity extends AppCompatActivity {
 
 
                 List<String> wordsList = OcrEngine.getWords();
-                textView.setText("");
+                TextView textView = (TextView) findViewById(R.id.textView);
+                textView.setText(null);
                 for (String word : wordsList) {
                     textView.append(word + ", ");
 
