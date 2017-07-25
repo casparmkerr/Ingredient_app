@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/AppTheme.NoActionBar">
+    android:theme="@style/AppTheme.NoActionBar"
+    android:id="@+id/cameraFragment">
 
     <com.threedoorstudio.ingredients.ingredient_app.AutoFitTextureView
         android:id="@+id/texture"
@@ -12,18 +14,6 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true" />
 
-    <ImageButton
-        android:id="@+id/info"
-        android:contentDescription="@string/description_info"
-        style="@android:style/Widget.Material.Light.Button.Borderless"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|right"
-        android:padding="20dp"
-        android:layout_alignTop="@+id/picture"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="23dp" />
-
     <Button
         android:id="@+id/picture"
         android:layout_width="wrap_content"
@@ -31,7 +21,8 @@
         android:text="@string/picture"
         android:layout_marginBottom="15dp"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:onClick="analyzeImage"/>
 
     <Button
         android:id="@+id/importPhoto"
@@ -42,6 +33,16 @@
         android:layout_toStartOf="@+id/picture"
         android:text="Import Photo"
         android:onClick="buttonClickFunction"/>
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@android:drawable/ic_menu_gallery"
+        android:layout_alignTop="@+id/picture"
+        android:layout_alignParentEnd="true"
+        android:layout_alignBottom="@+id/picture"
+        android:layout_toEndOf="@+id/picture" />
 
 
 </RelativeLayout>

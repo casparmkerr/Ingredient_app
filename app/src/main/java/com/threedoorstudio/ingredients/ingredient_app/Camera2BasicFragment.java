@@ -1,8 +1,3 @@
-package com.threedoorstudio.ingredients.ingredient_app;
-
-/**
- * Created by Caspar on 17/7/17.
- */
 /*
  * Copyright 2014 The Android Open Source Project
  *
@@ -18,64 +13,70 @@ package com.threedoorstudio.ingredients.ingredient_app;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-        import android.Manifest;
-        import android.app.Activity;
-        import android.app.AlertDialog;
-        import android.app.Dialog;
-        import android.app.DialogFragment;
-        import android.app.Fragment;
-        import android.content.Context;
-        import android.content.DialogInterface;
-        import android.content.Intent;
-        import android.content.pm.PackageManager;
-        import android.content.res.Configuration;
-        import android.graphics.ImageFormat;
-        import android.graphics.Matrix;
-        import android.graphics.Point;
-        import android.graphics.RectF;
-        import android.graphics.SurfaceTexture;
-        import android.hardware.camera2.CameraAccessException;
-        import android.hardware.camera2.CameraCaptureSession;
-        import android.hardware.camera2.CameraCharacteristics;
-        import android.hardware.camera2.CameraDevice;
-        import android.hardware.camera2.CameraManager;
-        import android.hardware.camera2.CameraMetadata;
-        import android.hardware.camera2.CaptureRequest;
-        import android.hardware.camera2.CaptureResult;
-        import android.hardware.camera2.TotalCaptureResult;
-        import android.hardware.camera2.params.StreamConfigurationMap;
-        import android.media.Image;
-        import android.media.ImageReader;
-        import android.os.Bundle;
-        import android.os.Environment;
-        import android.os.Handler;
-        import android.os.HandlerThread;
-        import android.support.annotation.NonNull;
-        import android.support.v13.app.FragmentCompat;
-        import android.support.v4.content.ContextCompat;
-        import android.util.Log;
-        import android.util.Size;
-        import android.util.SparseIntArray;
-        import android.view.LayoutInflater;
-        import android.view.Surface;
-        import android.view.TextureView;
-        import android.view.View;
-        import android.view.ViewGroup;
-        import android.widget.Toast;
 
-        import java.io.File;
-        import java.io.FileOutputStream;
-        import java.io.IOException;
-        import java.nio.ByteBuffer;
-        import java.util.ArrayList;
-        import java.util.Arrays;
-        import java.util.Collections;
-        import java.util.Comparator;
-        import java.util.List;
-        import java.util.concurrent.Semaphore;
-        import java.util.concurrent.TimeUnit;
+package com.threedoorstudio.ingredients.ingredient_app;
 
+import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.ImageFormat;
+import android.graphics.Matrix;
+import android.graphics.Point;
+import android.graphics.RectF;
+import android.graphics.SurfaceTexture;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
+import android.hardware.camera2.params.StreamConfigurationMap;
+import android.media.Image;
+import android.media.ImageReader;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.support.annotation.NonNull;
+import android.support.v13.app.FragmentCompat;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.util.Size;
+import android.util.SparseIntArray;
+import android.view.LayoutInflater;
+import android.view.Surface;
+import android.view.TextureView;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.Toast;
 
+import com.threedoorstudio.ingredients.ingredient_app.AutoFitTextureView;
+import com.threedoorstudio.ingredients.ingredient_app.R;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 public class Camera2BasicFragment extends Fragment
         implements View.OnClickListener, FragmentCompat.OnRequestPermissionsResultCallback {
@@ -85,6 +86,8 @@ public class Camera2BasicFragment extends Fragment
      */
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     private static final int REQUEST_CAMERA_PERMISSION = 1;
+    private static final int REQUEST_WRITE_PERMISSION = 1;
+
     private static final String FRAGMENT_DIALOG = "dialog";
 
     static {
@@ -93,7 +96,6 @@ public class Camera2BasicFragment extends Fragment
         ORIENTATIONS.append(Surface.ROTATION_180, 270);
         ORIENTATIONS.append(Surface.ROTATION_270, 180);
     }
-
 
     /**
      * Tag for the {@link Log}.
@@ -135,10 +137,6 @@ public class Camera2BasicFragment extends Fragment
      */
     private static final int MAX_PREVIEW_HEIGHT = 1080;
 
-
-    private String path;
-
-
     /**
      * {@link TextureView.SurfaceTextureListener} handles several lifecycle events on a
      * {@link TextureView}.
@@ -166,8 +164,6 @@ public class Camera2BasicFragment extends Fragment
         }
 
     };
-
-
 
     /**
      * ID of the current {@link CameraDevice}.
@@ -201,6 +197,7 @@ public class Camera2BasicFragment extends Fragment
 
         @Override
         public void onOpened(@NonNull CameraDevice cameraDevice) {
+
             // This method is called when the camera is opened.  We start camera preview here.
             mCameraOpenCloseLock.release();
             mCameraDevice = cameraDevice;
@@ -247,6 +244,8 @@ public class Camera2BasicFragment extends Fragment
      */
     private File mFile;
 
+    private static String path;
+
     /**
      * This a callback object for the {@link ImageReader}. "onImageAvailable" will be called when a
      * still image is ready to be saved.
@@ -292,6 +291,12 @@ public class Camera2BasicFragment extends Fragment
      * Orientation of the camera sensor
      */
     private int mSensorOrientation;
+
+    private ImageView imgView;
+
+
+
+
 
     /**
      * A {@link CameraCaptureSession.CaptureCallback} that handles events related to JPEG capture.
@@ -361,6 +366,7 @@ public class Camera2BasicFragment extends Fragment
 
     };
 
+
     /**
      * Shows a {@link Toast} on the UI thread.
      *
@@ -377,8 +383,6 @@ public class Camera2BasicFragment extends Fragment
             });
         }
     }
-
-
 
     /**
      * Given {@code choices} of {@code Size}s supported by a camera, choose the smallest one that
@@ -433,6 +437,8 @@ public class Camera2BasicFragment extends Fragment
         return new Camera2BasicFragment();
     }
 
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -442,18 +448,14 @@ public class Camera2BasicFragment extends Fragment
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         view.findViewById(R.id.picture).setOnClickListener(this);
-        view.findViewById(R.id.info).setOnClickListener(this);
+
         mTextureView = (AutoFitTextureView) view.findViewById(R.id.texture);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        String timeStamp = String.valueOf(System.currentTimeMillis());
-        String fileName = timeStamp + ".jpg";
-        mFile = new File(getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES), fileName);
-        path = Environment.DIRECTORY_PICTURES + "/" + fileName;
-
+        mFile = new File(getActivity().getExternalFilesDir(null), "pic.jpg");
     }
 
     @Override
@@ -488,11 +490,20 @@ public class Camera2BasicFragment extends Fragment
         }
     }
 
+    private void requestStoragePermission() {
+        if (FragmentCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            new StorageDialog().show(getChildFragmentManager(), FRAGMENT_DIALOG);
+        } else {
+            FragmentCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_WRITE_PERMISSION);
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         if (requestCode == REQUEST_CAMERA_PERMISSION) {
-            if (grantResults.length != 1 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length < 1 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 ErrorDialog.newInstance(getString(R.string.request_permission))
                         .show(getChildFragmentManager(), FRAGMENT_DIALOG);
             }
@@ -619,6 +630,10 @@ public class Camera2BasicFragment extends Fragment
      * Opens the camera specified by {@link Camera2BasicFragment#mCameraId}.
      */
     private void openCamera(int width, int height) {
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestStoragePermission();
+        }
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             requestCameraPermission();
@@ -798,6 +813,7 @@ public class Camera2BasicFragment extends Fragment
                     CameraMetadata.CONTROL_AF_TRIGGER_START);
             // Tell #mCaptureCallback to wait for the lock.
             mState = STATE_WAITING_LOCK;
+            System.out.println("In lockFocus");
             mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
                     mBackgroundHandler);
         } catch (CameraAccessException e) {
@@ -816,6 +832,7 @@ public class Camera2BasicFragment extends Fragment
                     CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
             // Tell #mCaptureCallback to wait for the precapture sequence to be set.
             mState = STATE_WAITING_PRECAPTURE;
+            System.out.println("In runPrecaptureSequence");
             mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
                     mBackgroundHandler);
         } catch (CameraAccessException e) {
@@ -847,6 +864,11 @@ public class Camera2BasicFragment extends Fragment
             int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, getOrientation(rotation));
 
+
+            captureBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_HIGH_QUALITY); //Reduces noise, needs a functionality check first
+
+            captureBuilder.set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_HIGH_QUALITY); //Improves sharpnes, needs a functionality check first
+
             CameraCaptureSession.CaptureCallback CaptureCallback
                     = new CameraCaptureSession.CaptureCallback() {
 
@@ -855,18 +877,37 @@ public class Camera2BasicFragment extends Fragment
                                                @NonNull CaptureRequest request,
                                                @NonNull TotalCaptureResult result) {
                     showToast("Saved: " + mFile);
+                    System.out.println("Saved " + mFile);
                     Log.d(TAG, mFile.toString());
+
                     unlockFocus();
 
-                    //OcrEngine ocrEngine = new OcrEngine(activity);
-                    OcrEngine.setValues(path); //If this path doesn't work, try technique from ImportPhotoActivity
-
-                    String string = OcrEngine.getValues();
-                    showToast(string);
 
                 }
             };
-            //OcrEngine.setValues(path);
+
+            //ResultsActivity.setValue(mFile.getPath());
+            path = mFile.getPath();
+            System.out.println(path);
+            //Intent intent = new Intent(getActivity(), ResultsActivity.class);
+            //intent.putExtra("path", path);
+            //startActivity(intent);
+
+            imgView = (ImageView) getView().findViewById(R.id.imageView);
+            final Bitmap bmp = BitmapFactory.decodeFile(mFile.getPath());
+
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    imgView.setImageBitmap(bmp);
+
+//stuff that updates ui
+
+                }
+            });
+            //final Bitmap bmp = BitmapFactory.decodeFile(mFile.getPath());
+            //OcrEngine.setValues(bmp);
+
             mCaptureSession.stopRepeating();
             mCaptureSession.capture(captureBuilder.build(), CaptureCallback, null);
         } catch (CameraAccessException e) {
@@ -914,18 +955,12 @@ public class Camera2BasicFragment extends Fragment
         switch (view.getId()) {
             case R.id.picture: {
                 takePicture();
+
                 break;
             }
-            case R.id.info: {
-                Activity activity = getActivity();
-                if (null != activity) {
-                    new AlertDialog.Builder(activity)
-                            .setMessage("Shut up")
-                            .setPositiveButton(android.R.string.ok, null)
-                            .show();
-                }
-                break;
-            }
+
+
+
         }
     }
 
@@ -939,7 +974,7 @@ public class Camera2BasicFragment extends Fragment
     /**
      * Saves a JPEG {@link Image} into the specified {@link File}.
      */
-    private static class ImageSaver implements Runnable {
+    private class ImageSaver implements Runnable {
 
         /**
          * The JPEG image
@@ -964,6 +999,7 @@ public class Camera2BasicFragment extends Fragment
             try {
                 output = new FileOutputStream(mFile);
                 output.write(bytes);
+                System.out.println("In run()");
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
@@ -975,6 +1011,9 @@ public class Camera2BasicFragment extends Fragment
                         e.printStackTrace();
                     }
                 }
+                getActivity().onBackPressed(); //Breaks out of fragment, which launches resultsactivity
+
+
             }
         }
 
@@ -1056,5 +1095,42 @@ public class Camera2BasicFragment extends Fragment
                     .create();
         }
     }
+
+    public static class StorageDialog extends DialogFragment {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Fragment parent = getParentFragment();
+            return new AlertDialog.Builder(getActivity())
+                    .setMessage(R.string.request_permission)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            FragmentCompat.requestPermissions(parent,
+                                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                    REQUEST_WRITE_PERMISSION);
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Activity activity = parent.getActivity();
+                                    if (activity != null) {
+                                        activity.finish();
+                                    }
+                                }
+                            })
+                    .create();
+        }
+    }
+
+    public static String getPath() {
+        return path;
+    }
+
+
+
+
 
 }

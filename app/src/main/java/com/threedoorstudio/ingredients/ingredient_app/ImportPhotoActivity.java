@@ -40,11 +40,12 @@ public class ImportPhotoActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE); //Removes the damn title bar
         setContentView(R.layout.activity_import_photo);
+        OcrEngine ocrEngine = new OcrEngine(getApplicationContext()); //Passes context to OcrEnigne, though it could probably have been done smoother by combining it with the function call later
 
         int permissionCheck = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                Manifest.permission.WRITE_EXTERNAL_STORAGE); //checks if app has permission to read/write
         Toast.makeText(getApplicationContext(), Integer.toString(permissionCheck), Toast.LENGTH_SHORT).show();
         if (ContextCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -58,7 +59,7 @@ public class ImportPhotoActivity extends AppCompatActivity {
 
 
 
-        ((Button) findViewById(R.id.add_photo_choose_photo))
+        ((Button) findViewById(R.id.add_photo_choose_photo)) //Add photo button, relies on internal android file manager
                 .setOnClickListener(new View.OnClickListener() {
                     public void onClick(View arg0) {
                         Intent intent = new Intent();
@@ -70,7 +71,7 @@ public class ImportPhotoActivity extends AppCompatActivity {
     }
 
 
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) { //When image is returned, lots of crap seems to be needed to actually get the correct filepath
         if (resultCode == RESULT_OK) {
             if (requestCode == SELECT_PICTURE) {
                 Uri selectedImage = data.getData();
@@ -98,19 +99,20 @@ public class ImportPhotoActivity extends AppCompatActivity {
                 cursor.close();
 
                 System.out.println("filePath : " + filePath);
-                OcrEngine.setValues(filePath);
+                Bitmap bmp = BitmapFactory.decodeFile(filePath); //Creates bitmap from file
+                OcrEngine.setValues(bmp); //calls OcrEngine to perform text recognition on bitmap
                 String text = OcrEngine.getValues();
                 System.out.println("Read text: " + text);
                 Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
 
 
-                mImg = (ImageView) findViewById(R.id.imageView1);
-                Bitmap bmp = OcrEngine.getBitmap();
-                mImg.setImageBitmap(bmp);
+                mImg = (ImageView) findViewById(R.id.imageView1); //Display "treated" image in view, to see what happens to it - debug feature
+                Bitmap bmp1 = OcrEngine.getBitmap();
+                mImg.setImageBitmap(bmp1);
 
 
 
-                List<String> wordsList = OcrEngine.getWords();
+                List<String> wordsList = OcrEngine.getWords(); //Displays the recognized text in comma separated list form, also for debugging
                 TextView textView = (TextView) findViewById(R.id.textView);
                 textView.setText(null);
                 for (String word : wordsList) {

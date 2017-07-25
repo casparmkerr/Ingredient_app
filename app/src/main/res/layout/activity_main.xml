@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="#000"
     tools:context="com.threedoorstudio.ingredients.ingredient_app.MainActivity"
-    android:theme="@style/AppTheme"
+    android:theme="@style/AppTheme.NoActionBar"
     />
 
 
