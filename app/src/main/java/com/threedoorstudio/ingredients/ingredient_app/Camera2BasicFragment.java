@@ -417,10 +417,16 @@ public class Camera2BasicFragment extends Fragment
         }
     }
 
+
+
     public static Camera2BasicFragment newInstance() {
         return new Camera2BasicFragment();
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
 
 
     @Override
@@ -643,6 +649,7 @@ public class Camera2BasicFragment extends Fragment
      * Closes the current {@link CameraDevice}.
      */
     private void closeCamera() {
+        System.out.println("closing Camera");
         try {
             mCameraOpenCloseLock.acquire();
             if (null != mCaptureSession) {
@@ -998,6 +1005,7 @@ public class Camera2BasicFragment extends Fragment
                         e.printStackTrace();
                     }
                 }
+                closeCamera();
                 getActivity().onBackPressed(); //Breaks out of fragment, which launches resultsactivity
 
 
