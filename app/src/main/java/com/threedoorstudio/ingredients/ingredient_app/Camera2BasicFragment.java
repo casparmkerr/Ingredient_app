@@ -423,8 +423,12 @@ public class Camera2BasicFragment extends Fragment
         return new Camera2BasicFragment();
     }
 
+
+
     @Override
     public void onStop() {
+        closeCamera();
+        stopBackgroundThread();
         super.onStop();
     }
 
@@ -1005,7 +1009,8 @@ public class Camera2BasicFragment extends Fragment
                         e.printStackTrace();
                     }
                 }
-                closeCamera();
+                //closeCamera(); //Uncomment if program crashes
+                //stopBackgroundThread(); //Along with this line. There is a chance it should be after onBackPressed though.
                 getActivity().onBackPressed(); //Breaks out of fragment, which launches resultsactivity
 
 
