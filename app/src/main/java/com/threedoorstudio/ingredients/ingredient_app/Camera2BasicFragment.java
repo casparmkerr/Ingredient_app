@@ -1012,7 +1012,12 @@ public class Camera2BasicFragment extends Fragment
                 }
                 //closeCamera(); //Uncomment if program crashes
                 //stopBackgroundThread(); //Along with this line. There is a chance it should be after onBackPressed though.
-                getActivity().onBackPressed(); //Breaks out of fragment, which launches resultsactivity
+                Activity mainactivity = new MainActivity();
+                Intent intent = new Intent(getActivity(), ResultsActivity.class); //Starts resultsactivity
+                intent.putExtra("filePathString", path);
+                startActivity(intent);
+
+                //getActivity().onBackPressed(); //Breaks out of fragment, which launches resultsactivity
 
 
             }
