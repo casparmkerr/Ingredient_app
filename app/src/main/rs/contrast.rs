@@ -23,9 +23,9 @@ uchar4 RS_KERNEL contrastAndBW(uchar4 in, uint32_t x, uint32_t y) {
   //tempPixel = tempPixel-((255-tempPixel)*0.15);
   if (tempPixel > 255) {tempPixel = 255;}
   else if (tempPixel < 0) {tempPixel = 0;}
-  //out.r=tempPixel;
+  out.r=tempPixel;
   //out.r = tempPixel;
-  out.r = (int)(((((tempPixel / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
+  //out.r = (int)(((((tempPixel / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
 
   /*if (out.r == 255) {out.r = 0;} else */if (out.r > 255) {out.r = 255;} else if (out.r <0) {out.r = 0;}
   out.g = out.r;

@@ -63,7 +63,7 @@ public class ResultsActivity extends Activity {
             List<String> matches;
             matches = search.matchWords(wordsList);
 
-            if (matches.size() == 0) {
+            if (matches.size() == 0 || matches == null) {
                 textView.append("Yay, no matches!");
                 /*for (String word : wordsList) {
                     textView.append(word + ", ");
