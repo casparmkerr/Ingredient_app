@@ -25,7 +25,8 @@ import static java.lang.Math.*;
 public class SearchEngine {
     //SearchEngine searchengine = new SearchEngine();
 
-    String badStuff = "SLIK BESTILLER du PIZZA. nei, kanskje, Joda, Beregn TRYKKPRISEN SELU";
+    String[] badStuff = {"SLIK", "BESTILLER", "DU", "PIZZA", "NEI", "KANSKJE", "JODA", "BEREGN", "TRYKKPRISEN", "SELU","VI"};
+    int badLength = badStuff.length;
 
 
     int k;
@@ -59,22 +60,39 @@ public class SearchEngine {
         Pattern pattern;
         Matcher matcher;
         for(int i = 0; i < listSize; ++i) {
-            String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toUpperCase();
+            for (int j = 0; j< badLength; ++j){
 
 
-            //System.out.println("In loop at least");
-            pattern = Pattern.compile(temp);
-            matcher = pattern.matcher(badStuff);
-            if (matcher.lookingAt()) {
-                matches.add(temp);
-                System.out.println("Match: " + temp);
-            } else {
+                String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toUpperCase();
+                if (temp.equals(badStuff[j])){
+                    matches.add(temp);
+                    System.out.println("Matched: "+temp+", "+badStuff[j]);
+                } else {
+                    System.out.println("Searched: "+temp+", "+badStuff[j]);
+                }
 
-                System.out.println("Searching: " + temp);
+                //System.out.println("In loop at least");
+
             }
         }
 
 /*
+pattern = Pattern.compile(temp);
+                matcher = pattern.matcher(badStuff);
+                if (matcher.lookingAt()) {
+                    matches.add(temp);
+                    System.out.println("Match: " + temp);
+                } else {
+
+                    System.out.println("Searching: " + temp);
+                }
+
+
+
+
+
+
+
 k=(int) (10-0.3*ingredients.get(i).length());
             if (k<0) {k =0;} else if (k>5) {k=5;}
 System.out.println(mismatch.searchString(badStuff,
