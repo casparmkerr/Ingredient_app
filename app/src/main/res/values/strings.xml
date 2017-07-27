@@ -5,6 +5,7 @@
     <string name="request_permission">This app needs camera permission.</string>
     <string name="camera_error">This device doesn\'t support Camera2 API.</string>
     <string name="title_activity_results">ResultsActivity</string>
+    <string name="import_photo">Import Photo</string>
 
 
 </resources>

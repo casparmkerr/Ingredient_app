@@ -119,14 +119,8 @@ public class MainActivity extends Activity {
 
 
 
-        /*Intent intent = new Intent(getApplicationContext(), ImportPhotoActivity.class);
-        startActivity(intent);*/
+
     }
-/*
-    public void analyzeImage(View v)
-    {
-        Intent intent = new Intent(getApplicationContext(), ImportPhotoActivity.class);
-        startActivity(intent);
-    }*/
+
 
 }
