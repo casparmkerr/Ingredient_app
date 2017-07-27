@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:theme="@style/AppTheme.NoActionBar"
     android:id="@+id/cameraFragment"
+
     >
 
     <com.threedoorstudio.ingredients.ingredient_app.AutoFitTextureView
@@ -33,6 +34,8 @@
         android:layout_toStartOf="@+id/picture"
         android:text="@string/import_photo"
         android:onClick="buttonClickFunction"/>
+
+
 
 
 </RelativeLayout>
