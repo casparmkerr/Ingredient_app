@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import java.util.List;
 
 public class ResultsActivity extends Activity {
@@ -41,13 +42,13 @@ public class ResultsActivity extends Activity {
         if (path != null) {
 
 
-
-
             final Bitmap bmp = BitmapFactory.decodeFile(path); //Creating bitmap
-            if (bmp != null) {OcrEngine.setValues(bmp);} //Passes image to text recognition
-            else {System.out.println("Shit");}
-
-
+            if (bmp != null) {
+                OcrEngine.setValues(bmp);
+            } //Passes image to text recognition
+            else {
+                System.out.println("Shit");
+            }
 
 
             ImageView mImg = (ImageView) findViewById(R.id.imageView2);
@@ -57,11 +58,25 @@ public class ResultsActivity extends Activity {
             List<String> wordsList = OcrEngine.getWords(); //gets list of recognized words
             TextView textView = (TextView) findViewById(R.id.textView1);
             textView.setText(null);
-            for (String word : wordsList) {
-                textView.append(word + ", ");
+            SearchEngine search = new SearchEngine() {
+            };
+            List<String> matches;
+            matches = search.matchWords(wordsList);
+
+            if (matches.size() == 0) {
+                textView.append("Yay, no matches!");
+                /*for (String word : wordsList) {
+                    textView.append(word + ", ");
+                }*/
+            } else {
+                textView.append("Oh no, a match!");
+                for (String word : matches) {
+                    textView.append(word + ", ");
+                }
+
 
             }
-            } else System.out.println("bmp is null");
+        }else {System.out.println("bmp is null");}
 
 
         }

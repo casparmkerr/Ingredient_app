@@ -21,12 +21,12 @@ public class BitmapPrimer {
 
 
 
-    public static Bitmap primeBitmap(Context ctx, Bitmap bmp) {
+    public static Bitmap primeBitmap(Context ctx, Bitmap inMap) {
         System.out.println("In primeBitmap");
         RenderScript rs = RenderScript.create(ctx);
 
         ScriptC_contrast contrast = new ScriptC_contrast(rs); //The following is basically just what's needed to communicate with renderscript, though I'm not sure if both finish and destroy is necessary. Anyway, didn't seem to do any harm
-        Bitmap inMap = bmp;
+
 
         Bitmap outMap = Bitmap.createBitmap(inMap.getWidth(), inMap.getHeight(), inMap.getConfig());
         Allocation inAllocation = Allocation.createFromBitmap(rs, inMap);

@@ -423,8 +423,12 @@ public class Camera2BasicFragment extends Fragment
         return new Camera2BasicFragment();
     }
 
+
+
     @Override
     public void onStop() {
+        closeCamera();
+        stopBackgroundThread();
         super.onStop();
     }
 
@@ -684,6 +688,7 @@ public class Camera2BasicFragment extends Fragment
      * Stops the background thread and its {@link Handler}.
      */
     private void stopBackgroundThread() {
+        if (mBackgroundThread != null) {
         mBackgroundThread.quitSafely();
         try {
             mBackgroundThread.join();
@@ -691,7 +696,7 @@ public class Camera2BasicFragment extends Fragment
             mBackgroundHandler = null;
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }}
     }
 
     /**
@@ -1005,8 +1010,14 @@ public class Camera2BasicFragment extends Fragment
                         e.printStackTrace();
                     }
                 }
-                closeCamera();
-                getActivity().onBackPressed(); //Breaks out of fragment, which launches resultsactivity
+                //closeCamera(); //Uncomment if program crashes
+                //stopBackgroundThread(); //Along with this line. There is a chance it should be after onBackPressed though.
+                Activity mainactivity = new MainActivity();
+                Intent intent = new Intent(getActivity(), ResultsActivity.class); //Starts resultsactivity
+                intent.putExtra("filePathString", path);
+                startActivity(intent);
+
+                //getActivity().onBackPressed(); //Breaks out of fragment, which launches resultsactivity
 
 
             }

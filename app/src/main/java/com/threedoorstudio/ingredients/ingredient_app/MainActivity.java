@@ -39,14 +39,14 @@ public class MainActivity extends Activity {
             this.finish();
         } else {
             getFragmentManager().popBackStack();
-        }
+        }/*
         path = Camera2BasicFragment.getPath(); //Retrieves image path
         System.out.println("onBackPressed");
         System.out.println("Path in main: " + path);
 
         Intent intent = new Intent(getApplicationContext(), ResultsActivity.class); //Starts resultsactivity
         intent.putExtra("filePathString", path);
-        startActivity(intent);
+        startActivity(intent);*/
         super.onBackPressed();
         //path = Camera2BasicFragment.getPath();
 
