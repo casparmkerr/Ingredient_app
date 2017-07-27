@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.renderscript.*;
 import java.lang.Math;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 //import com.threedoorstudio.ingredients_app.ScriptC_search;
@@ -31,7 +33,7 @@ public class SearchEngine {
     ArrayList<String> matches = new ArrayList<String>();
     public ArrayList<String> matchWords(List<String> ingredients) {
         System.out.println("In SearchEngine");
-        MismatchSearch mismatch = new MismatchSearch() {
+        /*MismatchSearch mismatch = new MismatchSearch() {
             @Override
             public Object processBytes(byte[] pattern, int k) {
                 return null;
@@ -51,26 +53,33 @@ public class SearchEngine {
             public int[] searchChars(char[] text, int textStart, int textEnd, char[] pattern, Object processed, int k) {
                 return new int[0];
             }
-        };
-        //k = 2;
+        };*/
         ArrayList<int[]> misma = new ArrayList<>();
         int listSize = ingredients.size();
+        Pattern pattern;
+        Matcher matcher;
         for(int i = 0; i < listSize; ++i) {
-            System.out.println("In loop at least");
-            k=(int) (10-0.3*ingredients.get(i).length());
-            if (k<0) {k =0;} else if (k>6) {k=6;}
-            System.out.println("Searching: " + ingredients.get(i));
-            misma.add(mismatch.searchString(badStuff,
-                    ingredients.get(i), k));
-                //matches.add(ingredients.get(i));
-                //System.out.println("Match");
+            String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toUpperCase();
 
-            System.out.println(k);
-            System.out.println(misma);
 
+            //System.out.println("In loop at least");
+            pattern = Pattern.compile(temp);
+            matcher = pattern.matcher(badStuff);
+            if (matcher.lookingAt()) {
+                matches.add(temp);
+                System.out.println("Match: " + temp);
+            } else {
+
+                System.out.println("Searching: " + temp);
+            }
         }
 
 /*
+k=(int) (10-0.3*ingredients.get(i).length());
+            if (k<0) {k =0;} else if (k>5) {k=5;}
+System.out.println(mismatch.searchString(badStuff,
+                    ingredients.get(i), k));
+
 
         for (String word : ingredients) {
             k=(int)Math.exp(31/word.length())-1;
@@ -83,7 +92,7 @@ public class SearchEngine {
 
         }*/
 
-        return (ArrayList<String>) ingredients;
+        return matches;
 
     }
 

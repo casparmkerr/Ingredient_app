@@ -42,13 +42,13 @@ public class ResultsActivity extends Activity {
         if (path != null) {
 
 
-
-
             final Bitmap bmp = BitmapFactory.decodeFile(path); //Creating bitmap
-            if (bmp != null) {OcrEngine.setValues(bmp);} //Passes image to text recognition
-            else {System.out.println("Shit");}
-
-
+            if (bmp != null) {
+                OcrEngine.setValues(bmp);
+            } //Passes image to text recognition
+            else {
+                System.out.println("Shit");
+            }
 
 
             ImageView mImg = (ImageView) findViewById(R.id.imageView2);
@@ -58,15 +58,16 @@ public class ResultsActivity extends Activity {
             List<String> wordsList = OcrEngine.getWords(); //gets list of recognized words
             TextView textView = (TextView) findViewById(R.id.textView1);
             textView.setText(null);
-            SearchEngine search = new SearchEngine() {};
+            SearchEngine search = new SearchEngine() {
+            };
             List<String> matches;
             matches = search.matchWords(wordsList);
 
             if (matches == null) {
                 textView.append("Yay, no matches!");
-                for (String word : wordsList) {
+                /*for (String word : wordsList) {
                     textView.append(word + ", ");
-                }
+                }*/
             } else {
                 textView.append("Oh no, a match!");
                 for (String word : matches) {
@@ -75,7 +76,7 @@ public class ResultsActivity extends Activity {
 
 
             }
-            } else System.out.println("bmp is null");
+        }else {System.out.println("bmp is null");}
 
 
         }
