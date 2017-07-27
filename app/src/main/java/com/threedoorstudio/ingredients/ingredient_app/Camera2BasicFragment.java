@@ -688,6 +688,7 @@ public class Camera2BasicFragment extends Fragment
      * Stops the background thread and its {@link Handler}.
      */
     private void stopBackgroundThread() {
+        if (mBackgroundThread != null) {
         mBackgroundThread.quitSafely();
         try {
             mBackgroundThread.join();
@@ -695,7 +696,7 @@ public class Camera2BasicFragment extends Fragment
             mBackgroundHandler = null;
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }}
     }
 
     /**

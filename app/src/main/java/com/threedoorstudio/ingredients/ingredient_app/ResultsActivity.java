@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import java.util.List;
 
 public class ResultsActivity extends Activity {
@@ -57,8 +58,21 @@ public class ResultsActivity extends Activity {
             List<String> wordsList = OcrEngine.getWords(); //gets list of recognized words
             TextView textView = (TextView) findViewById(R.id.textView1);
             textView.setText(null);
-            for (String word : wordsList) {
-                textView.append(word + ", ");
+            SearchEngine search = new SearchEngine() {};
+            List<String> matches;
+            matches = search.matchWords(wordsList);
+
+            if (matches == null) {
+                textView.append("Yay, no matches!");
+                for (String word : wordsList) {
+                    textView.append(word + ", ");
+                }
+            } else {
+                textView.append("Oh no, a match!");
+                for (String word : matches) {
+                    textView.append(word + ", ");
+                }
+
 
             }
             } else System.out.println("bmp is null");
