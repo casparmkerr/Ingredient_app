@@ -2,11 +2,18 @@ package com.threedoorstudio.ingredients.ingredient_app;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 
 public class MainActivity extends Activity {
+
+    private static final int SELECT_PICTURE = 1;
 
     public static String path;
 
@@ -29,7 +36,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        path = Camera2BasicFragment.getPath();
+        //path = Camera2BasicFragment.getPath();
         new ResultsActivity();
     }
 
@@ -52,17 +59,68 @@ public class MainActivity extends Activity {
 
     }
 
-    public static String getPath() {
+    /*public static String getPath() {
         return path;
 
-    }
+    }*/
 
 
 
     public void buttonClickFunction(View v) //Starts import photo-activity on buttonclick
     {
-        Intent intent = new Intent(getApplicationContext(), ImportPhotoActivity.class);
-        startActivity(intent);
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
+
+        }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) { //When image is returned, lots of crap seems to be needed to actually get the correct filepath
+        if (resultCode == RESULT_OK) {
+            if (requestCode == SELECT_PICTURE) {
+                Uri selectedImage = data.getData();
+                String wholeID = DocumentsContract.getDocumentId(selectedImage);
+
+                // Split at colon, use second item in the array
+                String id = wholeID.split(":")[1];
+
+                String[] column = {MediaStore.Images.Media.DATA};
+
+                // where id is equal to
+                String sel = MediaStore.Images.Media._ID + "=?";
+
+                Cursor cursor = getContentResolver().
+                        query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                column, sel, new String[]{id}, null);
+
+                String path = "";
+
+                int columnIndex = cursor.getColumnIndex(column[0]);
+
+                if (cursor.moveToFirst()) {
+                    path = cursor.getString(columnIndex);
+                }
+                cursor.close();
+
+                System.out.println("filePath : " + path);
+                Intent intent = new Intent(this, ResultsActivity.class); //Starts resultsactivity
+                intent.putExtra("filePathString", path);
+                startActivity(intent);
+
+
+
+            }
+
+
+
+
+        }
+
+
+
+
+        /*Intent intent = new Intent(getApplicationContext(), ImportPhotoActivity.class);
+        startActivity(intent);*/
     }
 /*
     public void analyzeImage(View v)
