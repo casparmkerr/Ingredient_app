@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.renderscript.*;
 import java.lang.Math;
+import java.util.Arrays;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,8 +27,9 @@ import static java.lang.Math.*;
 public class SearchEngine {
     //SearchEngine searchengine = new SearchEngine();
 
-    String[] badStuff = {"SLIK", "BESTILLER", "DU", "PIZZA", "NEI", "KANSKJE", "JODA", "BEREGN", "TRYKKPRISEN", "SELU","VI"};
+    String badStuff[] = {"slik", "bestiller", "du", "pizza", "nei", "kanskje", "joda", "beregn", "trykkprisen", "selv","vi"}; //Temp string to be replaced by list of bad substances
     int badLength = badStuff.length;
+
 
 
     int k;
@@ -34,7 +37,29 @@ public class SearchEngine {
     ArrayList<String> matches = new ArrayList<String>();
     public ArrayList<String> matchWords(List<String> ingredients) {
         System.out.println("In SearchEngine");
-        /*MismatchSearch mismatch = new MismatchSearch() {
+        Arrays.sort(badStuff);
+        int listSize = ingredients.size();
+        ArrayList<String> modIngredients = new ArrayList<String>();
+
+
+        for(int i = 0; i < listSize; ++i) {
+            String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toLowerCase(); //Strips away stuff for flexibility in writing - doesn't seem to really work well enough though
+            if (temp.length()<3){continue;}
+            String match = binarySearch(badStuff, temp);
+            if (match != null) {
+                modIngredients.add(ingredients.get(i)+" MATCH"); //Adds "MATCH" if it's a match. Needs to be changed later, but works for now. List should probably sorted so the matches end ut on top too.
+                //matches.add(match);
+            } else {
+                modIngredients.add(ingredients.get(i)); //if no match, add element as detected
+            }
+
+        }
+
+
+
+
+/*
+        MismatchSearch mismatch = new MismatchSearch() {
             @Override
             public Object processBytes(byte[] pattern, int k) {
                 return null;
@@ -54,16 +79,50 @@ public class SearchEngine {
             public int[] searchChars(char[] text, int textStart, int textEnd, char[] pattern, Object processed, int k) {
                 return new int[0];
             }
-        };*/
+        };
         ArrayList<int[]> misma = new ArrayList<>();
-        int listSize = ingredients.size();
+
         Pattern pattern;
         Matcher matcher;
+        // Returns index of x if it is present in arr[], else
+        // return -1
+
+
+        for(int i = 0; i < listSize; ++i) {
+            if (ingredients.get(i).length()<4){continue;}
+            char b0 = ingredients.get(i).charAt(0);
+            char b1 = ingredients.get(i).charAt(1);
+            String ingredientWord = ingredients.get(i);
+            int l = 0, r = badLength - 1;
+            while (l <= r) {
+                int m = l + (r - l) / 2;
+                String wordIndex = badStuff[m];
+                char a0 = wordIndex.charAt(0);
+                char a1 = wordIndex.charAt(1);
+
+                // Check if x is present at mid
+                if (ingredientWord == wordIndex) {
+                    matches.add(ingredientWord);
+                }
+
+
+                // If x greater, ignore left half
+                if (wordIndex < ingredientWord)
+                    l = m + 1;
+
+                    // If x is smaller, ignore right half
+                else
+                    r = m - 1;
+            }
+
+            // if we reach here, then element was not present
+
+        }
         for(int i = 0; i < listSize; ++i) {
             for (int j = 0; j< badLength; ++j){
 
 
-                String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toUpperCase();
+                String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toLowerCase();
                 if (temp.equals(badStuff[j])){
                     matches.add(temp);
                     System.out.println("Matched: "+temp+", "+badStuff[j]);
@@ -110,7 +169,28 @@ System.out.println(mismatch.searchString(badStuff,
 
         }*/
 
-        return matches;
+        return modIngredients;
+
+    }
+
+    public static String binarySearch(String[] a, String x) { //Performs binary search
+        int low = 0;
+        int high = a.length - 1;
+        int mid;
+
+        while (low <= high) {
+            mid = (low + high) / 2;
+
+            if (a[mid].compareTo(x) < 0) {
+                low = mid + 1;
+            } else if (a[mid].compareTo(x) > 0) {
+                high = mid - 1;
+            } else {
+                return x;
+            }
+        }
+        return null;
+
 
     }
 

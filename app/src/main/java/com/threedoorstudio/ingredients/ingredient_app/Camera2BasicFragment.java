@@ -892,18 +892,7 @@ public class Camera2BasicFragment extends Fragment
             //intent.putExtra("path", path);
             //startActivity(intent);
 
-            imgView = (ImageView) getView().findViewById(R.id.imageView);
-            final Bitmap bmp = BitmapFactory.decodeFile(mFile.getPath());
 
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    imgView.setImageBitmap(bmp);
-
-//stuff that updates ui
-
-                }
-            });
             //final Bitmap bmp = BitmapFactory.decodeFile(mFile.getPath());
             //OcrEngine.setValues(bmp);
 
