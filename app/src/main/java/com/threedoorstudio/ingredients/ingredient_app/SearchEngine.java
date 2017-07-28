@@ -39,20 +39,27 @@ public class SearchEngine {
         System.out.println("In SearchEngine");
         Arrays.sort(badStuff);
         int listSize = ingredients.size();
+        ArrayList<String> modIngredients = new ArrayList<String>();
 
 
         for(int i = 0; i < listSize; ++i) {
-            String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toLowerCase();
+            String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toLowerCase(); //Strips away stuff for flexibility in writing - doesn't seem to really work well enough though
             if (temp.length()<3){continue;}
             String match = binarySearch(badStuff, temp);
             if (match != null) {
-                matches.add(match);
+                modIngredients.add(ingredients.get(i)+" MATCH"); //Adds "MATCH" if it's a match. Needs to be changed later, but works for now. List should probably sorted so the matches end ut on top too.
+                //matches.add(match);
+            } else {
+                modIngredients.add(ingredients.get(i)); //if no match, add element as detected
             }
 
         }
 
 
-        /*MismatchSearch mismatch = new MismatchSearch() {
+
+
+/*
+        MismatchSearch mismatch = new MismatchSearch() {
             @Override
             public Object processBytes(byte[] pattern, int k) {
                 return null;
@@ -72,7 +79,7 @@ public class SearchEngine {
             public int[] searchChars(char[] text, int textStart, int textEnd, char[] pattern, Object processed, int k) {
                 return new int[0];
             }
-        };*/
+        };
         ArrayList<int[]> misma = new ArrayList<>();
 
         Pattern pattern;
@@ -80,7 +87,7 @@ public class SearchEngine {
         // Returns index of x if it is present in arr[], else
         // return -1
 
-/*
+
         for(int i = 0; i < listSize; ++i) {
             if (ingredients.get(i).length()<4){continue;}
             char b0 = ingredients.get(i).charAt(0);
@@ -162,11 +169,11 @@ System.out.println(mismatch.searchString(badStuff,
 
         }*/
 
-        return matches;
+        return modIngredients;
 
     }
 
-    public static String binarySearch(String[] a, String x) {
+    public static String binarySearch(String[] a, String x) { //Performs binary search
         int low = 0;
         int high = a.length - 1;
         int mid;

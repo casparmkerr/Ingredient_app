@@ -43,12 +43,13 @@ public class OcrEngine {
 
 
     //SparseArray text = new SparseArray();
-
+/*
     public OcrEngine(Context context) {
         c = context;
     } //Recieves context necesarry to build the TextRecognizer. Could be merged with setValues
-
-    static void setValues(Bitmap bmp) {
+*/
+    static void setValues(Context context, Bitmap bmp) {
+        c = context;
 
         System.out.println(bmp);
 

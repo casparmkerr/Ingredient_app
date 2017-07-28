@@ -29,7 +29,7 @@ public class MainActivity extends Activity {
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         setContentView(R.layout.activity_main);
-        OcrEngine ocrEngine = new OcrEngine(getApplicationContext());
+        //OcrEngine ocrEngine = new OcrEngine(getApplicationContext());
         Intent intent = new Intent(getApplicationContext(), ResultsActivity.class);
         if (null == savedInstanceState) {
 
