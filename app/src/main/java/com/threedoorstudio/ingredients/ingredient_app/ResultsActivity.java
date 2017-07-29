@@ -26,12 +26,14 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class ResultsActivity extends Activity {
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private String matchKeyword = "MATCHED";
 
     List<String> wordsList;
 
@@ -114,7 +116,7 @@ public class ResultsActivity extends Activity {
             }*/
         }else {System.out.println("bmp is null");}
 
-        ImageView mImg = (ImageView) findViewById(R.id.imageView2); //Finds imageview to display image
+        ImageView mImg = findViewById(R.id.imageView2); //Finds imageview to display image
 
         Bitmap bmp1 = OcrEngine.getBitmap(); //gets treated bitmap
         mImg.setImageBitmap(bmp1);
@@ -181,7 +183,16 @@ public class ResultsActivity extends Activity {
         public void onBindViewHolder(ViewHolder holder, int position) {
             // - get element from your dataset at this position
             // - replace the contents of the view with that element
-            holder.mTextView.setText(mDataset[position]);
+            //holder.mTextView.setText(mDataset[position]);
+
+            if (Pattern.compile(Pattern.quote(matchKeyword), Pattern.CASE_INSENSITIVE).matcher(mDataset[position]).find()) {
+                holder.mTextView.setBackgroundColor(Color.RED);
+                holder.mTextView.setText(mDataset[position]);
+            } else {
+                holder.mTextView.setText(mDataset[position]);
+            }
+
+
 
         }
 

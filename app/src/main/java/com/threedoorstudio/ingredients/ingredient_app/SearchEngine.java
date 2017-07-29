@@ -29,7 +29,7 @@ public class SearchEngine {
 
     String badStuff[] = {"slik", "bestiller", "du", "pizza", "nei", "kanskje", "joda", "beregn", "trykkprisen", "selv","vi"}; //Temp string to be replaced by list of bad substances
     int badLength = badStuff.length;
-
+    int index;
 
 
     int k;
@@ -37,20 +37,27 @@ public class SearchEngine {
     ArrayList<String> matches = new ArrayList<String>();
     public ArrayList<String> matchWords(List<String> ingredients) {
         System.out.println("In SearchEngine");
+        System.out.println("Unsorted: "+Arrays.toString(badStuff));
         Arrays.sort(badStuff);
+        System.out.println("Sorted: "+Arrays.toString(badStuff));
         int listSize = ingredients.size();
-        ArrayList<String> modIngredients = (ArrayList<String>) ingredients;
+        //ArrayList<String> modIngredients = (ArrayList<String>) ingredients; //Possible other way to do this
+        ArrayList<String> modIngredients = new ArrayList<>();
 
-
-        for(int i = 0; i < listSize; ++i) {
-            String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toLowerCase(); //Strips away stuff for flexibility in writing - doesn't seem to really work well enough though
+        for(int i = 0; i < listSize; ++i) { //Iterating through every scanned ingredient
+            String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toLowerCase().trim(); //Strips away stuff for flexibility in writing - doesn't seem to really work well enough though
             //if (temp.length()<3){continue;}
-            String match = binarySearch(badStuff, temp);
-            if (match != null) {
+
+            index = Arrays.binarySearch(badStuff,temp);
+            System.out.println("Checking: "+temp+" Index: "+ index);
+            //String match = binarySearch(badStuff, temp);
+
+            if (index <= -1) { //No match
+                modIngredients.add(ingredients.get(i)); //if no match, add element as detected
+            } else {
+                //System.out.println("Whaaaaat?"); //Test to see if this ever happens
                 modIngredients.add(ingredients.get(i)+" MATCH"); //Adds "MATCH" if it's a match. Needs to be changed later, but works for now. List should probably sorted so the matches end ut on top too.
                 //matches.add(match);
-            } else {
-                modIngredients.add(ingredients.get(i)); //if no match, add element as detected
             }
 
         }
@@ -173,7 +180,7 @@ System.out.println(mismatch.searchString(badStuff,
 
     }
 
-    public static String binarySearch(String[] a, String x) { //Performs binary search
+    public static String binarySearch(String[] a, String x) { //Performs binary search, though extremely badly, it seems.
         int low = 0;
         int high = a.length - 1;
         int mid;
