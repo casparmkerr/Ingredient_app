@@ -127,7 +127,7 @@ public class ResultsActivity extends Activity {
         modIngredients = search.matchWords(wordsList);
         RelativeLayout rl = (RelativeLayout)findViewById(R.id.resActivity);
 
-        if (modIngredients.equals(wordsList)) { //Never equal, need to fix this.
+        if (modIngredients.equals(wordsList)) {
 
             rl.setBackgroundColor(Color.GREEN);
         } else {

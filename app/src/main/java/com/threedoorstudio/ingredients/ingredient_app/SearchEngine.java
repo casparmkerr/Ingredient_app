@@ -39,12 +39,12 @@ public class SearchEngine {
         System.out.println("In SearchEngine");
         Arrays.sort(badStuff);
         int listSize = ingredients.size();
-        ArrayList<String> modIngredients = new ArrayList<String>();
+        ArrayList<String> modIngredients = (ArrayList<String>) ingredients;
 
 
         for(int i = 0; i < listSize; ++i) {
             String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toLowerCase(); //Strips away stuff for flexibility in writing - doesn't seem to really work well enough though
-            if (temp.length()<3){continue;}
+            //if (temp.length()<3){continue;}
             String match = binarySearch(badStuff, temp);
             if (match != null) {
                 modIngredients.add(ingredients.get(i)+" MATCH"); //Adds "MATCH" if it's a match. Needs to be changed later, but works for now. List should probably sorted so the matches end ut on top too.
