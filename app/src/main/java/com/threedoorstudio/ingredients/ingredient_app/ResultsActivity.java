@@ -5,6 +5,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import java.io.IOException;
 import java.util.List;
 
 public class ResultsActivity extends Activity {
@@ -64,7 +68,27 @@ public class ResultsActivity extends Activity {
         if (path != null) {
 
 
-            final Bitmap bmp = BitmapFactory.decodeFile(path); //Creating bitmap
+            Bitmap bmp = BitmapFactory.decodeFile(path); //Creating bitmap
+
+
+            try {
+                ExifInterface exif=new ExifInterface(path);
+                Log.d("EXIF value", exif.getAttribute(ExifInterface.TAG_ORIENTATION));
+                if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("6")){
+                    bmp=rotate(bmp, 90);
+                }else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("8")){
+                    bmp=rotate(bmp, 270);
+                }else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("3")) {
+                    bmp = rotate(bmp, 180);
+
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+
+
             if (bmp != null) {
                 OcrEngine.setValues(this, bmp);
             } //Passes image to text recognition
@@ -166,6 +190,16 @@ public class ResultsActivity extends Activity {
         public int getItemCount() {
             return mDataset.length;
         }
+    }
+
+    public static Bitmap rotate(Bitmap bitmap, int degree) {
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+
+        Matrix mtx = new Matrix();
+        mtx.postRotate(degree);
+
+        return Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
     }
 
 

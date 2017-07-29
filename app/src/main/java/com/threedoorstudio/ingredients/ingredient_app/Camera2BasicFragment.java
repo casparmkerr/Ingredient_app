@@ -427,6 +427,7 @@ public class Camera2BasicFragment extends Fragment
 
     @Override
     public void onStop() {
+
         closeCamera();
         stopBackgroundThread();
         super.onStop();
@@ -492,6 +493,8 @@ public class Camera2BasicFragment extends Fragment
                     REQUEST_WRITE_PERMISSION);
         }
     }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -879,7 +882,7 @@ public class Camera2BasicFragment extends Fragment
                     System.out.println("Saved " + mFile);
                     Log.d(TAG, mFile.toString());
 
-                    unlockFocus();
+                    //unlockFocus();
 
 
                 }
