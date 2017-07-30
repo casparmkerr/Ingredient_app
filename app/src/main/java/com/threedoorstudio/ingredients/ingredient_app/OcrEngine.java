@@ -23,6 +23,7 @@ import com.google.android.gms.vision.Detector;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -120,6 +121,7 @@ public class OcrEngine {
             }
         }
         wordsArrayList = Arrays.asList(detectedText.split("(?=[,.])|\\s+"));
+        wordsArrayList.removeAll(Collections.singleton(null));
         //detectedTextView.setText(detectedText);
         System.out.println("Text: " + detectedText);
         textRecognizer.release();

@@ -56,7 +56,7 @@ public class SearchEngine {
                 modIngredients.add(ingredients.get(i)); //if no match, add element as detected
             } else {
                 //System.out.println("Whaaaaat?"); //Test to see if this ever happens
-                modIngredients.add(ingredients.get(i)+" MATCH"); //Adds "MATCH" if it's a match. Needs to be changed later, but works for now. List should probably sorted so the matches end ut on top too.
+                modIngredients.add("  --0AAA "+ingredients.get(i)); //Adds "  --0AA" if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
                 //matches.add(match);
             }
 
