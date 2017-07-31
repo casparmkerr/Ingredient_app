@@ -27,7 +27,10 @@ import static java.lang.Math.*;
 public class SearchEngine {
     //SearchEngine searchengine = new SearchEngine();
 
-    String badStuff[] = {"slik", "bestiller", "du", "pizza", "nei", "kanskje", "joda", "beregn", "trykkprisen", "selv","vi"}; //Temp string to be replaced by list of bad substances
+    String badStuff[] = {"3benzylidenecamphor", "4hydroxybenzoicacid", "4methylbenzylidenecamphor", "acetylhexamethyltetralin", "benzophenone", "benzophenone1",
+            "benzophenone2", "benzophenone3", "bha", "butylhydroxyanisole","bht","butylatedhydroxytoluene","boricacid","butylparaben","cyclopentasiloxane","cyclomethicone",
+            "cyclotetrasiloxane","diethylphthalate","dep","dihydroxybiphenyl","deltamethrin","ethylhexylmethoxycinnamate","ethylparaben","hydroxycinnamicacid","hexamethylindanopyran",
+            "methylparaben","nitrophenol","octoxynol","propylparaben","resorcinol","resmethrin","styrene","tbutylmethylether","mtbe","triclosan","triphenylphosphate"}; //List of endocrine disruptors, formatted to be easier to detect (no signs, caps or spaces)
     int badLength = badStuff.length;
     int index;
 
