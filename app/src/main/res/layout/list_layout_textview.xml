@@ -2,7 +2,8 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/textView1"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
-    android:textColor="@color/WHITE"
-    />
+    android:layout_height="100dp"
+    android:background="@color/offWhite"
+
+    android:textColor="@color/common_google_signin_btn_text_dark_focused" />
 

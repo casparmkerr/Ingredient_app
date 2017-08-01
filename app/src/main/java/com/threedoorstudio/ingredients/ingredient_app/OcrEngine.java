@@ -22,6 +22,8 @@ import com.google.android.gms.vision.Detector;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,7 +41,7 @@ public class OcrEngine {
     static String detectedText;
     static Bitmap treatedBmp;
     static Bitmap bmp;
-    static List<String> wordsArrayList = new ArrayList<String>();
+    private static List<String> wordsArrayList = new ArrayList<String>();
 
 
     //SparseArray text = new SparseArray();
@@ -79,34 +81,47 @@ public class OcrEngine {
         }
         //SparseArray<TextBlock> text = detector.detect(frame);
         SparseArray<TextBlock> textBlocks = textRecognizer.detect(outputFrame); //Runs actual OCR
+
+
         //text1 = block.toString();
         detectedText = ""; //Extracing text in various way down here, needs to be cleaned up eventually
         for (int i = 0; i < textBlocks.size(); i++) {
             TextBlock textBlock = textBlocks.valueAt(i);
             if (textBlock != null && textBlock.getValue() != null) {
-                detectedText += textBlock.getValue();
+                detectedText += textBlock.getValue().replaceAll("[\n\r]", "");
+                if (detectedText.endsWith("-")) {
+                    detectedText = detectedText.substring(0, detectedText.length() - 1);
+                } else
+                detectedText += " ";
+
             }
         }
         String blocks = "";
         String lines = "";
 
         String words = "";
-        wordsArrayList.clear();
+        //wordsArrayList.clear();
 
         for (int index = 0; index < textBlocks.size(); index++) {
             //extract scanned text blocks here
             TextBlock tBlock = textBlocks.valueAt(index);
+
             blocks = blocks + tBlock.getValue() + "\n" + "\n";
+
+
             for (Text line : tBlock.getComponents()) {
                 //extract scanned text lines here
-                lines = lines + line.getValue() + "\n";
+                lines = lines + line.getValue() /*+ "\n"*/;
+
                 for (Text element : line.getComponents()) {
                     //extract scanned text words here
-                    wordsArrayList.add(element.getValue());
+                    //wordsArrayList.add(element.getValue());
                     words = words + element.getValue() + ", ";
                 }
             }
         }
+        wordsArrayList = Arrays.asList(detectedText.split("(?=[,.])|\\s+"));
+        wordsArrayList.removeAll(Collections.singleton(null));
         //detectedTextView.setText(detectedText);
         System.out.println("Text: " + detectedText);
         textRecognizer.release();

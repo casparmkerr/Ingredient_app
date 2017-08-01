@@ -5,6 +5,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,13 +24,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class ResultsActivity extends Activity {
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private String matchKeyword = "  --0AAA "; //Enables to check for "  --0AA", to see if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
 
     List<String> wordsList;
 
@@ -64,7 +72,27 @@ public class ResultsActivity extends Activity {
         if (path != null) {
 
 
-            final Bitmap bmp = BitmapFactory.decodeFile(path); //Creating bitmap
+            Bitmap bmp = BitmapFactory.decodeFile(path); //Creating bitmap
+
+
+            try {
+                ExifInterface exif=new ExifInterface(path);
+                Log.d("EXIF value", exif.getAttribute(ExifInterface.TAG_ORIENTATION));
+                if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("6")){
+                    bmp=rotate(bmp, 90);
+                }else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("8")){
+                    bmp=rotate(bmp, 270);
+                }else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("3")) {
+                    bmp = rotate(bmp, 180);
+
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+
+
             if (bmp != null) {
                 OcrEngine.setValues(this, bmp);
             } //Passes image to text recognition
@@ -90,7 +118,7 @@ public class ResultsActivity extends Activity {
             }*/
         }else {System.out.println("bmp is null");}
 
-        ImageView mImg = (ImageView) findViewById(R.id.imageView2); //Finds imageview to display image
+        ImageView mImg = findViewById(R.id.imageView2); //Finds imageview to display image
 
         Bitmap bmp1 = OcrEngine.getBitmap(); //gets treated bitmap
         mImg.setImageBitmap(bmp1);
@@ -103,7 +131,7 @@ public class ResultsActivity extends Activity {
         modIngredients = search.matchWords(wordsList);
         RelativeLayout rl = (RelativeLayout)findViewById(R.id.resActivity);
 
-        if (modIngredients.equals(wordsList)) { //Never equal, need to fix this.
+        if (modIngredients.equals(wordsList)) {
 
             rl.setBackgroundColor(Color.GREEN);
         } else {
@@ -111,8 +139,12 @@ public class ResultsActivity extends Activity {
             rl.setBackgroundColor(Color.RED);
         }
 
-        String[] ingredients = modIngredients.toArray(new String[0]);
+        //Arrays.sort(modIngredients);
 
+        //modIngredients.removeAll(Collections.singleton(null));
+
+        String[] ingredients = modIngredients.toArray(new String[0]);
+        Arrays.sort(ingredients);
         mAdapter = new MyAdapter(ingredients);
         mRecyclerView.setAdapter(mAdapter); //Starts the "Recyclerview" listview.
 
@@ -126,6 +158,8 @@ public class ResultsActivity extends Activity {
         // Complex data items may need more than one view per item, and
         // you provide access to all the views for a data item in a view holder
         public class ViewHolder extends RecyclerView.ViewHolder {
+
+
             // each data item is just a string in this case
             public TextView mTextView;
             public ViewHolder(TextView v) {
@@ -157,7 +191,18 @@ public class ResultsActivity extends Activity {
         public void onBindViewHolder(ViewHolder holder, int position) {
             // - get element from your dataset at this position
             // - replace the contents of the view with that element
-            holder.mTextView.setText(mDataset[position]);
+            //holder.mTextView.setText(mDataset[position]);
+
+            if (mDataset[position].contains(matchKeyword)) {
+                holder.mTextView.setBackgroundColor(Color.RED);
+
+                holder.mTextView.setText(mDataset[position].replaceAll(matchKeyword, ""));
+            } else {
+                holder.mTextView.setBackgroundColor(Color.WHITE);
+                holder.mTextView.setText(mDataset[position]);
+            }
+
+
 
         }
 
@@ -166,6 +211,16 @@ public class ResultsActivity extends Activity {
         public int getItemCount() {
             return mDataset.length;
         }
+    }
+
+    public static Bitmap rotate(Bitmap bitmap, int degree) {
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+
+        Matrix mtx = new Matrix();
+        mtx.postRotate(degree);
+
+        return Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
     }
 
 
