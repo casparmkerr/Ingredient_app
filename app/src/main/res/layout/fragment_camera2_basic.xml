@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:theme="@style/AppTheme.NoActionBar"
     android:id="@+id/cameraFragment"
-
     >
 
     <com.threedoorstudio.ingredients.ingredient_app.AutoFitTextureView
@@ -22,7 +21,7 @@
         android:layout_height="48dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="25dp"
+        android:layout_marginBottom="@dimen/img_btn_distance_from_navigationbar"
         android:background="@drawable/take_picture_button" />
 
 

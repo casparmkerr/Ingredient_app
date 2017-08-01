@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.threedoorstudio.ingredients.ingredient_app.ResultsActivity"
-    android:theme="@style/AppTheme.NoActionBar">
+    android:theme="@style/AppTheme.NoActionBar"
+    >
 
     <ImageView
         android:id="@+id/imageView2"
