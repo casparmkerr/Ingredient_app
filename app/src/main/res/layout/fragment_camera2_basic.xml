@@ -15,26 +15,25 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true" />
 
-    <Button
+
+    <ImageButton
         android:id="@+id/picture"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/picture"
-        android:layout_marginBottom="15dp"
+        android:layout_width="104dp"
+        android:layout_height="48dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        />
+        android:layout_marginBottom="25dp"
+        android:background="@drawable/take_picture_button" />
 
-    <Button
+
+    <ImageButton
         android:id="@+id/importPhoto"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/picture"
-        android:layout_marginEnd="21dp"
-        android:layout_toStartOf="@+id/picture"
-        android:text="@string/import_photo"
-        android:onClick="buttonClickFunction"/>
-
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/import_img_button"
+        android:onClick="buttonClickFunction" />
 
 
 </RelativeLayout>
