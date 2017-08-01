@@ -75,7 +75,7 @@ public class ResultsActivity extends Activity {
             Bitmap bmp = BitmapFactory.decodeFile(path); //Creating bitmap
 
 
-            try {
+            try { //Needed to rotate pictures taken with samsung phones to correct orientation
                 ExifInterface exif=new ExifInterface(path);
                 Log.d("EXIF value", exif.getAttribute(ExifInterface.TAG_ORIENTATION));
                 if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("6")){

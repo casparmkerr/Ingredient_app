@@ -40,8 +40,8 @@ public class BitmapPrimer {
 
     }
 
-//Old, horribly slow methods that are currently replaced by Renderscript and in-built image effects:
-    /*
+//Old, horribly slow methods that are currently replaced by Renderscript and in-built image effects, though not well enough:
+/*
     private static Bitmap sharpen(Bitmap bitmap) {
         int width, height;
         height = bitmap.getHeight();
@@ -82,7 +82,7 @@ public class BitmapPrimer {
         }
         return bmpBlurred;
     }
-
+/*
     private static Bitmap noiseReduction(Bitmap src) {
         // image size
         int width = src.getWidth();
