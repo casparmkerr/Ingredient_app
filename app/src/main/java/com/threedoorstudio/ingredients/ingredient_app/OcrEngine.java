@@ -87,7 +87,7 @@ public class OcrEngine {
         detectedText = ""; //Extracing text in various way down here, needs to be cleaned up eventually
         for (int i = 0; i < textBlocks.size(); i++) {
             TextBlock textBlock = textBlocks.valueAt(i);
-            if (textBlock != null && textBlock.getValue() != null) {
+            if (textBlock != null && textBlock.getValue() != null && textBlock.getValue().length() >2) {
                 detectedText += textBlock.getValue().replaceAll("[\n\r]", "");
                 if (detectedText.endsWith("-")) {
                     detectedText = detectedText.substring(0, detectedText.length() - 1);

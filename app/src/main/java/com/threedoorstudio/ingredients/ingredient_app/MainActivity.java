@@ -29,6 +29,12 @@ public class MainActivity extends Activity {
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         setContentView(R.layout.activity_main);
+        diff_match_patch dmp = new diff_match_patch();
+        String text1 = "Analfabet";
+        String text2 = "4natfabdddt";
+        for (int i = 0; i<dmp.diff_main(text1,text2).size();i++) {
+            System.out.println(dmp.diff_main(text1, text2).get(i).toString());
+        }
         //OcrEngine ocrEngine = new OcrEngine(getApplicationContext());
         Intent intent = new Intent(getApplicationContext(), ResultsActivity.class);
         if (null == savedInstanceState) {

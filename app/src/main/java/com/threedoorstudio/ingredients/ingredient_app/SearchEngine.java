@@ -6,6 +6,7 @@ import android.renderscript.*;
 import java.lang.Math;
 import java.util.Arrays;
 
+import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,22 +38,73 @@ public class SearchEngine {
 
     int k;
 
+    Boolean cont;
+
+    diff_match_patch matchObject = new diff_match_patch();
+
+
+
     ArrayList<String> matches = new ArrayList<String>();
     public ArrayList<String> matchWords(List<String> ingredients) {
         System.out.println("In SearchEngine");
         System.out.println("Unsorted: "+Arrays.toString(badStuff));
         Arrays.sort(badStuff);
         System.out.println("Sorted: "+Arrays.toString(badStuff));
-        int listSize = ingredients.size();
+        int ingredientsListSize = ingredients.size();
         //ArrayList<String> modIngredients = (ArrayList<String>) ingredients; //Possible other way to do this
         ArrayList<String> modIngredients = new ArrayList<>();
 
-        for(int i = 0; i < listSize; ++i) { //Iterating through every scanned ingredient
+        for(int i = 0; i < ingredientsListSize; i++) { //Iterating through every scanned ingredient
             String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toLowerCase().trim(); //Strips away stuff for flexibility in writing - doesn't seem to really work well enough though
             //if (temp.length()<3){continue;}
+            cont = false;
+            for (int j = 0; j< badLength; ++j){
 
-            index = Arrays.binarySearch(badStuff,temp);
-            System.out.println("Checking: "+temp+" Index: "+ index);
+                if (temp.equals(badStuff[j])) {
+                    modIngredients.add("  --0AAA " + ingredients.get(i)); //Adds "  --0AA" if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
+                    System.out.println("Matched: " + temp + ", " + badStuff[j]);
+                    cont = true;
+                    break;
+                }
+                else {
+                    float delete = 0;
+                    float insert = 0;
+                    float equal = 0;
+                    float ratio = 0;
+                    LinkedList diff = matchObject.diff_main(badStuff[j],temp);
+                    for (k = 0; k < diff.size();k++){
+                        if (diff.get(k).toString().contains("DELETE")) {
+                            delete += (diff.get(k).toString().length() -15);
+                        } else if (diff.get(k).toString().contains("INSERT")) {
+                            insert += (diff.get(k).toString().length() -15);
+                        } else if (diff.get(k).toString().contains("EQUAL")){
+                            equal += (diff.get(k).toString().length() -14);
+                        }
+                    }
+                    if (equal != 0) {
+                        ratio = (float) ((equal / (equal + delete)) + (equal / (equal + insert))) / 2;
+                        System.out.println("Ratio: "+ratio+ "   Delete: "+delete+"    Insert: "+insert+"    Equal: "+equal);
+                    }
+                    if (ratio > 0.7) {
+                        modIngredients.add("  --0AAA "+ingredients.get(i)); //Adds "  --0AA" if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
+                        System.out.println("Mostly matched: "+temp+", "+badStuff[j]);
+                        cont = true;
+                        break;
+                    }
+                }
+                System.out.println("Searched: " + temp + ", " + badStuff[j]);
+                //System.out.println("In loop at least");
+
+            }
+            if (cont) {
+                continue;
+            }
+
+            modIngredients.add(ingredients.get(i)); //if no match, add element as detected
+
+
+            //index = Arrays.binarySearch(badStuff,temp);
+ /*           System.out.println("Checking: "+temp+" Index: "+ index);
             //String match = binarySearch(badStuff, temp);
 
             if (index <= -1) { //No match
@@ -61,7 +113,7 @@ public class SearchEngine {
                 //System.out.println("Whaaaaat?"); //Test to see if this ever happens
                 modIngredients.add("  --0AAA "+ingredients.get(i)); //Adds "  --0AA" if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
                 //matches.add(match);
-            }
+            }*/
 
         }
 
