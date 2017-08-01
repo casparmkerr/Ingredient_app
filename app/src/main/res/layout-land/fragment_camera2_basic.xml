@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@style/AppTheme.NoActionBar"
-    android:id="@+id/cameraFragment">
+    android:id="@+id/cameraFragment"
+    >
 
 
     <com.threedoorstudio.ingredients.ingredient_app.AutoFitTextureView
@@ -14,27 +15,23 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true" />
 
-    <Button
+    <ImageButton
         android:id="@+id/picture"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/picture"
-
-        android:layout_centerVertical="true"
+        android:layout_width="48dp"
+        android:layout_height="104dp"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="15dp"
-        android:layout_marginTop="95dp" />
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="@dimen/img_btn_distance_from_navigationbar"
+        android:background="@drawable/take_picture_button_land" />
 
-    <Button
+
+    <ImageButton
         android:id="@+id/importPhoto"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="15dp"
-        android:layout_marginEnd="15dp"
-        android:text="@string/import_photo"
-        android:onClick="buttonClickFunction"/>
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/import_img_button"
+        android:onClick="buttonClickFunction" />
 
 </RelativeLayout>

@@ -1,3 +1,4 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="img_btn_distance_from_navigationbar">25dp</dimen>
 </resources>
