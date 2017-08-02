@@ -58,7 +58,9 @@ public class SearchEngine {
             String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toLowerCase().trim(); //Strips away stuff for flexibility in writing - doesn't seem to really work well enough though
             //if (temp.length()<3){continue;}
             cont = false;
+
             for (int j = 0; j< badLength; ++j){
+
 
                 if (temp.equals(badStuff[j])) { //Checks first if it's a straight match
                     modIngredients.add("  --0AAA " + ingredients.get(i)); //Adds "  --0AA" if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
@@ -85,7 +87,7 @@ public class SearchEngine {
                         ratio = (float) ((equal / (equal + delete)) + (equal / (equal + insert))) / 2; //calculates a ratio, should probably be refined
                         System.out.println("Ratio: "+ratio+ "   Delete: "+delete+"    Insert: "+insert+"    Equal: "+equal);
                     }
-                    if (ratio > 0.7) { //If the current word is "close enough", count it as a match. Note: this is too sensitive, but at the same time not sensitive enough. A smarter algorithm would be nice.
+                    if (ratio > 0.7 && (equal-insert>0)) { //If the current word is "close enough", count it as a match. Note: this is too sensitive, but at the same time not sensitive enough. A smarter algorithm would be nice.
                         modIngredients.add("  --0AAA "+ingredients.get(i)); //Adds "  --0AA" if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
                         System.out.println("Mostly matched: "+temp+", "+badStuff[j]);
                         cont = true;

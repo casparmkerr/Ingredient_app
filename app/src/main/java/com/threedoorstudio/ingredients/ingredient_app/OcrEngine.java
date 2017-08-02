@@ -41,8 +41,8 @@ public class OcrEngine {
     static String detectedText;
     static Bitmap treatedBmp;
     static Bitmap bmp;
+    private static List<String> tempWordsArrayList = new ArrayList<String>();
     private static List<String> wordsArrayList = new ArrayList<String>();
-
 
     //SparseArray text = new SparseArray();
 /*
@@ -120,8 +120,20 @@ public class OcrEngine {
                 }
             }
         }
-        wordsArrayList = Arrays.asList(detectedText.split("(?=[,.])|\\s+"));
-        wordsArrayList.removeAll(Collections.singleton(null));
+        tempWordsArrayList = Arrays.asList(detectedText.split("(?=[,.])|\\s+"));
+        tempWordsArrayList.removeAll(Collections.singleton(null));
+        for (int i = 0; i<tempWordsArrayList.size();i++){
+            if (tempWordsArrayList.get(i).length()<3) {
+                continue; //No point searching through words of shorter length than any substance in the database
+            } else if (tempWordsArrayList.get(i).length()>28){ //Sometimes it concatenates words that should not be concatenated; this might help be trying to identify new ingredients based upon capital letters.
+                String[] r = tempWordsArrayList.get(i).split("(?=\\p{Lu})"); //Might mess up long words beginning with a number followed by a capital letter, or when it detects a lower-case letter as upper-case.
+                for (int j = 0; j<r.length;j++) {
+                    wordsArrayList.add(r[i]);
+                }
+            } else {
+                wordsArrayList.add(tempWordsArrayList.get(i));
+            }
+        }
         //detectedTextView.setText(detectedText);
         System.out.println("Text: " + detectedText);
         textRecognizer.release();
