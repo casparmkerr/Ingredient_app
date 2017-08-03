@@ -127,7 +127,7 @@ public class ResultsActivity extends Activity {
         //textView.setText(null);
         SearchEngine search = new SearchEngine() {
         };
-        List<String> modIngredients;
+        List<String> modIngredients = null;
         modIngredients = search.matchWords(wordsList);
         RelativeLayout rl = (RelativeLayout)findViewById(R.id.resActivity);
 

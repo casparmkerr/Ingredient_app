@@ -120,6 +120,8 @@ public class OcrEngine {
                 }
             }
         }
+
+        wordsArrayList.clear();
         tempWordsArrayList = Arrays.asList(detectedText.split("(?=[,.])|\\s+"));
         tempWordsArrayList.removeAll(Collections.singleton(null));
         for (int i = 0; i<tempWordsArrayList.size();i++){
@@ -128,7 +130,7 @@ public class OcrEngine {
             } else if (tempWordsArrayList.get(i).length()>28){ //Sometimes it concatenates words that should not be concatenated; this might help be trying to identify new ingredients based upon capital letters.
                 String[] r = tempWordsArrayList.get(i).split("(?=\\p{Lu})"); //Might mess up long words beginning with a number followed by a capital letter, or when it detects a lower-case letter as upper-case.
                 for (int j = 0; j<r.length;j++) {
-                    wordsArrayList.add(r[i]);
+                    wordsArrayList.add(r[j]);
                 }
             } else {
                 wordsArrayList.add(tempWordsArrayList.get(i));

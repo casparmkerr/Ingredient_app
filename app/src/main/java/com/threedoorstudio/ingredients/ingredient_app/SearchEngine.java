@@ -36,6 +36,7 @@ public class SearchEngine {
     int index;
 
 
+
     int k;
 
     Boolean cont;
@@ -59,7 +60,7 @@ public class SearchEngine {
             //if (temp.length()<3){continue;}
             cont = false;
 
-            for (int j = 0; j< badLength; ++j){
+            for (int j = 0; j< badLength; ++j) {
 
 
                 if (temp.equals(badStuff[j])) { //Checks first if it's a straight match
@@ -68,34 +69,34 @@ public class SearchEngine {
                     cont = true;
                     break; //No point in evaluating the current ingredient further
                 }
-                else { //If not, check how far away
-                    float delete = 0;
-                    float insert = 0;
-                    float equal = 0;
-                    float ratio = 0;
-                    LinkedList diff = matchObject.diff_main(badStuff[j],temp); //Finds difference between strings
-                    for (k = 0; k < diff.size();k++){
-                        if (diff.get(k).toString().contains("DELETE")) {
-                            delete += (diff.get(k).toString().length() -15);
-                        } else if (diff.get(k).toString().contains("INSERT")) {
-                            insert += (diff.get(k).toString().length() -15);
-                        } else if (diff.get(k).toString().contains("EQUAL")){
-                            equal += (diff.get(k).toString().length() -14);
-                        }
-                    }
-                    if (equal != 0) { //Avoid divide by zero exeption
-                        ratio = (float) ((equal / (equal + delete)) + (equal / (equal + insert))) / 2; //calculates a ratio, should probably be refined
-                        System.out.println("Ratio: "+ratio+ "   Delete: "+delete+"    Insert: "+insert+"    Equal: "+equal);
-                    }
-                    if (ratio > 0.7 && (equal-insert>0)) { //If the current word is "close enough", count it as a match. Note: this is too sensitive, but at the same time not sensitive enough. A smarter algorithm would be nice.
-                        modIngredients.add("  --0AAA "+ingredients.get(i)); //Adds "  --0AA" if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
-                        System.out.println("Mostly matched: "+temp+", "+badStuff[j]);
-                        cont = true;
-                        break; //No point in evaluating the current ingredient further
+            }
+            if ( cont) {continue;}
+            for (int j = 0; j< badLength; j++){
+
+                float delete = 0;
+                float insert = 0;
+                float equal = 0;
+                float ratio = 0;
+                LinkedList diff = matchObject.diff_main(temp,badStuff[j]); //Finds difference between strings
+                for (k = 0; k < diff.size();k++){
+                    if (diff.get(k).toString().contains("DELETE")) {
+                        delete += (diff.get(k).toString().length() -15);
+                    } else if (diff.get(k).toString().contains("INSERT")) {
+                        insert += (diff.get(k).toString().length() -15);
+                    } else if (diff.get(k).toString().contains("EQUAL")){
+                        equal += (diff.get(k).toString().length() -14);
                     }
                 }
-                System.out.println("Searched: " + temp + ", " + badStuff[j]);
-                //System.out.println("In loop at least");
+                if (equal != 0) { //Avoid divide by zero exeption
+                    ratio = (float) ((equal / (equal + delete*0.8)) + (equal / (equal + insert*1.2))) / 2; //calculates a ratio, should probably be refined
+                    System.out.println("Ratio: "+ratio+ "   Delete: "+delete+"    Insert: "+insert+"    Equal: "+equal);
+                }
+                if (ratio > 0.7 && (equal-insert>0)) { //If the current word is "close enough", count it as a match. Note: this is too sensitive, but at the same time not sensitive enough. A smarter algorithm would be nice.
+                    modIngredients.add("  --0AAA "+ingredients.get(i)); //Adds "  --0AA" if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
+                    System.out.println("Mostly matched: "+temp+", "+badStuff[j]);
+                    cont = true;
+                    break; //No point in evaluating the current ingredient further
+                }
 
             }
             if (cont) { //Element is already added to list

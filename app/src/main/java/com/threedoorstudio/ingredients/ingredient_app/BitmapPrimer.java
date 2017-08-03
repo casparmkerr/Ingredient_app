@@ -12,19 +12,46 @@ import android.renderscript.*;
 
 import com.threedoorstudio.ingredients_app.ScriptC_contrast;
 
+import jp.co.cyberagent.android.gpuimage.GPUImage;
+import jp.co.cyberagent.android.gpuimage.GPUImage3x3ConvolutionFilter;
+import jp.co.cyberagent.android.gpuimage.GPUImageBilateralFilter;
+import jp.co.cyberagent.android.gpuimage.GPUImageContrastFilter;
+import jp.co.cyberagent.android.gpuimage.GPUImageFilterGroup;
+import jp.co.cyberagent.android.gpuimage.GPUImageGrayscaleFilter;
+import jp.co.cyberagent.android.gpuimage.GPUImageSharpenFilter;
+import jp.co.cyberagent.android.gpuimage.GPUImageSobelEdgeDetection;
+
 
 /**
  * Created by Caspar on 23/7/17.
  */
 
 public class BitmapPrimer {
+    
+    
 
 
 
     public static Bitmap primeBitmap(Context ctx, Bitmap inMap) {
         System.out.println("In primeBitmap");
-        RenderScript rs = RenderScript.create(ctx);
+        //RenderScript rs = RenderScript.create(ctx);
 
+        float[] concolutionKernel = {};
+
+        GPUImage mGPUImage = new GPUImage(ctx);
+
+        GPUImageFilterGroup group = new GPUImageFilterGroup();
+        group.addFilter(new GPUImageGrayscaleFilter());
+        group.addFilter(new GPUImageContrastFilter(10));
+        group.addFilter(new GPUImageSobelEdgeDetection());
+        group.addFilter(new GPUImageBilateralFilter(3));
+        group.addFilter(new GPUImageSharpenFilter(5));
+
+        mGPUImage.setFilter(group);
+
+
+        Bitmap outMap = mGPUImage.getBitmapWithFilterApplied(inMap);
+/*
         ScriptC_contrast contrast = new ScriptC_contrast(rs); //The following is basically just what's needed to communicate with renderscript, though I'm not sure if both finish and destroy is necessary. Anyway, didn't seem to do any harm
 
 
@@ -34,7 +61,7 @@ public class BitmapPrimer {
         contrast.forEach_contrastAndBW(inAllocation, outAllocation);
         outAllocation.copyTo(outMap);
         rs.finish();
-        rs.destroy();
+        rs.destroy();*/
         System.out.println("returns outMap");
         return outMap; //Returns treated bitmap to OcrEngine
 
