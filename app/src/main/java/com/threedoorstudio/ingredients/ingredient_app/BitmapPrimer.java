@@ -15,9 +15,11 @@ import com.threedoorstudio.ingredients_app.ScriptC_contrast;
 import jp.co.cyberagent.android.gpuimage.GPUImage;
 import jp.co.cyberagent.android.gpuimage.GPUImage3x3ConvolutionFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageBilateralFilter;
+import jp.co.cyberagent.android.gpuimage.GPUImageBrightnessFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageContrastFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageFilterGroup;
 import jp.co.cyberagent.android.gpuimage.GPUImageGrayscaleFilter;
+import jp.co.cyberagent.android.gpuimage.GPUImageKuwaharaFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageSharpenFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageSobelEdgeDetection;
 
@@ -41,10 +43,12 @@ public class BitmapPrimer {
         GPUImage mGPUImage = new GPUImage(ctx);
 
         GPUImageFilterGroup group = new GPUImageFilterGroup();
+
+        group.addFilter(new GPUImageBrightnessFilter((float) 0.1));
         group.addFilter(new GPUImageGrayscaleFilter());
         group.addFilter(new GPUImageContrastFilter(10));
-        group.addFilter(new GPUImageSobelEdgeDetection());
-        group.addFilter(new GPUImageBilateralFilter(3));
+        //group.addFilter(new GPUImageSobelEdgeDetection());
+        //group.addFilter(new GPUImageKuwaharaFilter(1));
         group.addFilter(new GPUImageSharpenFilter(5));
 
         mGPUImage.setFilter(group);
@@ -67,7 +71,7 @@ public class BitmapPrimer {
 
     }
 
-//Old, horribly slow methods that are currently replaced by Renderscript and in-built image effects, though not well enough:
+//Old, horribly slow methods that are currently replaced by GPUImage and in-built image effects, though not well enough:
 /*
     private static Bitmap sharpen(Bitmap bitmap) {
         int width, height;
