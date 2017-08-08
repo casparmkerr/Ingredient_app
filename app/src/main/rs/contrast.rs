@@ -8,6 +8,8 @@ int tempPixel;
 float contrast;
 float value = 20;
 
+int threshold = 150;
+
 
 
 void init() { //Runs once when the script is first called
@@ -20,6 +22,14 @@ uchar4 RS_KERNEL contrastAndBW(uchar4 in, uint32_t x, uint32_t y) {
 
   tempPixel = (out.r + 2* out.g + out.b)/4; //Crude B&W-conversion
 
+  if (tempPixel > threshold) {
+    if (out.r > out.g) {tempPixel = out.r;} else {tempPixel = out.g;}
+    if (out.b > tempPixel) {tempPixel = out.b;}
+  } else {
+    if (out.r < out.g) {tempPixel = out.r;} else {tempPixel = out.g;}
+        if (out.b < tempPixel) {tempPixel = out.b;}
+  }
+
   //tempPixel = tempPixel-((255-tempPixel)*0.15);
   if (tempPixel > 255) {tempPixel = 255;}
   else if (tempPixel < 0) {tempPixel = 0;}
@@ -27,7 +37,7 @@ uchar4 RS_KERNEL contrastAndBW(uchar4 in, uint32_t x, uint32_t y) {
 
   //out.r = (int)(((((tempPixel / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
 
-  /*if (out.r == 255) {out.r = 0;} else */if (out.r > 255) {out.r = 255;} else if (out.r <0) {out.r = 0;}
+  /* if (out.r == 255) {out.r = 0;} else if (out.r > 255) {out.r = 255;} else if (out.r <0) {out.r = 0;} */
   out.g = out.r;
   out.b = out.r;
   //

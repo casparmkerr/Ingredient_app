@@ -28,16 +28,30 @@ import static java.lang.Math.*;
 public class SearchEngine {
     //SearchEngine searchengine = new SearchEngine();
 
-    String badStuff[] = {"3benzylidenecamphor", "4hydroxybenzoicacid", "4methylbenzylidenecamphor", "acetylhexamethyltetralin", "benzophenone", "benzophenone1",
+    String endocrineDisruptors[] = {"3benzylidenecamphor", "4hydroxybenzoicacid", "4methylbenzylidenecamphor", "acetylhexamethyltetralin", "benzophenone", "benzophenone1",
             "benzophenone2", "benzophenone3", "bha", "butylhydroxyanisole","bht","butylatedhydroxytoluene","boricacid","butylparaben","cyclopentasiloxane","cyclomethicone",
             "cyclotetrasiloxane","diethylphthalate","dep","dihydroxybiphenyl","deltamethrin","ethylhexylmethoxycinnamate","ethylparaben","hydroxycinnamicacid","hexamethylindanopyran",
             "methylparaben","nitrophenol","octoxynol","propylparaben","resorcinol","resmethrin","styrene","tbutylmethylether","mtbe","triclosan","triphenylphosphate"}; //List of endocrine disruptors, formatted to be easier to detect (no signs, caps or spaces)
-    int badLength = badStuff.length;
+
+    String sensitisers[] = {"Alpha-isomenthyl ionone", "Amylcinnamyl alcohol", "Anise Alcohol", "Benzyl Alcohol", "Benzyl benzoate", "Benzyl cinnamate", "Benzyl salicylate", "Benzylideneheptanal", "Butylphenyl methylpropional",
+    "Cinnamal", "Cinnamyl alcohol", "Citral", "Citronnellol", "Coumarin", "Eugenol", "Evernia Furfuracea", "Evernia Prunastri", "Farnesol", "Geraniol", "Hexyl cinnamal", "Hydroksycitronellal", "Hydroxyisohexyl 3- Cyclohexene Carboxaldehyde",
+    "Isoeugenol", "Limonene", "Linalool", "Methyl 2-octynoate"};
+
+    int sensitisersLength = sensitisers.length;
+
+    int endocrineLength = endocrineDisruptors.length;
+
+    ArrayList<String> sensitisersLowerArray = new ArrayList<>();
+    String sensitisersLower[] = new String[sensitisersLength];
+
     int index;
 
+    String enocrineMatch = "  --0AAA ";
+    String sensitiserMatch = "  --0AAB ";
 
 
-    int k;
+
+    //int k;
 
     Boolean cont;
 
@@ -48,12 +62,20 @@ public class SearchEngine {
     ArrayList<String> matches = new ArrayList<String>();
     public ArrayList<String> matchWords(List<String> ingredients) {
         System.out.println("In SearchEngine");
-        System.out.println("Unsorted: "+Arrays.toString(badStuff));
-        Arrays.sort(badStuff);
-        System.out.println("Sorted: "+Arrays.toString(badStuff));
+        System.out.println("Unsorted: "+Arrays.toString(endocrineDisruptors));
+        Arrays.sort(endocrineDisruptors);
+        System.out.println("Sorted: "+Arrays.toString(endocrineDisruptors));
         int ingredientsListSize = ingredients.size();
         //ArrayList<String> modIngredients = (ArrayList<String>) ingredients; //Possible other way to do this
         ArrayList<String> modIngredients = new ArrayList<>();
+
+        for(int i = 0; i < sensitisersLength; i++)
+            sensitisersLower[i] = (sensitisers[i].toLowerCase().replaceAll("[^a-zA-Z]", ""));
+
+
+
+        Arrays.sort(sensitisersLower);
+
 
         for(int i = 0; i < ingredientsListSize; i++) { //Iterating through every scanned ingredient
             String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toLowerCase().trim(); //Strips away stuff for flexibility in writing - doesn't seem to really work well enough though
@@ -61,29 +83,29 @@ public class SearchEngine {
             cont = false;
 
 
-            index = Arrays.binarySearch(badStuff,temp); //First looking for direct matches
+            index = Arrays.binarySearch(endocrineDisruptors,temp); //First looking for direct matches
             System.out.println("Checking: "+temp+" Index: "+ index);
-            //String match = binarySearch(badStuff, temp);
+            //String match = binarySearch(endocrineDisruptors, temp);
 
             if (index >= 0) { //Direct match
-                modIngredients.add("  --0AAA " + ingredients.get(i)); //Adds "  --0AA" if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
-                System.out.println("Matched: " + temp);
+                modIngredients.add(enocrineMatch + ingredients.get(i)); //Adds String endocrineMatch if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
+                System.out.println("Matched endocrine disruptor: " + temp);
                 cont = true;
             } else { //No direct match, proceeds to looking for badly detected matches
-                for (int j = 0; j< badLength; j++){
+                for (int j = 0; j< endocrineLength; j++){
 
                     float delete = 0;
                     float insert = 0;
                     float equal = 0;
                     float ratio = 0;
-                    LinkedList diff = matchObject.diff_main(temp,badStuff[j]); //Finds difference between strings
-                    for (k = 0; k < diff.size();k++){
+                    LinkedList diff = matchObject.diff_main(temp,endocrineDisruptors[j]); //Finds difference between strings
+                    for (int k = 0; k < diff.size();k++){
                         if (diff.get(k).toString().contains("DELETE")) {
-                            delete += (diff.get(k).toString().length() -15);
+                            delete += (diff.get(k).toString().length() -15);//Returned String contains 15 chars too many
                         } else if (diff.get(k).toString().contains("INSERT")) {
-                            insert += (diff.get(k).toString().length() -15);
+                            insert += (diff.get(k).toString().length() -15);//Returned String contains 15 chars too many
                         } else if (diff.get(k).toString().contains("EQUAL")){
-                            equal += (diff.get(k).toString().length() -14);
+                            equal += (diff.get(k).toString().length() -14);//Returned String contains 14 chars too many
                         }
                     }
                     if (equal != 0) { //Avoid divide by zero exeption
@@ -91,8 +113,8 @@ public class SearchEngine {
                         System.out.println("Ratio: "+ratio+ "   Delete: "+delete+"    Insert: "+insert+"    Equal: "+equal);
                     }
                     if (ratio > 0.8 && (equal-insert>0)) { //If the current word is "close enough", count it as a match. Note: this is too sensitive, but at the same time not sensitive enough. A smarter algorithm would be nice.
-                        modIngredients.add("  --0AAA "+ingredients.get(i)); //Adds "  --0AA" if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
-                        System.out.println("Mostly matched: "+temp+", "+badStuff[j]);
+                        modIngredients.add(enocrineMatch + ingredients.get(i)); //Adds String endocrineMatch if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
+                        System.out.println("Mostly matched endocrine disruptor: "+temp+", "+endocrineDisruptors[j]);
                         cont = true;
                         break; //No point in evaluating the current ingredient further
                     }
@@ -100,7 +122,48 @@ public class SearchEngine {
                 }
             }
 
-            //if ( cont) {continue;}
+
+
+            if ( cont) {continue;}
+            index = Arrays.binarySearch(sensitisersLower,temp); //First looking for direct matches
+            System.out.println("Checking: "+temp+" Index: "+ index);
+
+
+            if (index >= 0) { //Direct match
+                modIngredients.add(sensitiserMatch + ingredients.get(i)); //Adds String sensitiserMatch if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
+                System.out.println("Matched sensitiser: " + temp);
+                cont = true;
+            } else { //No direct match, proceeds to looking for badly detected matches
+                for (int j = 0; j< sensitisersLength; j++){
+
+                    float delete = 0;
+                    float insert = 0;
+                    float equal = 0;
+                    float ratio = 0;
+                    LinkedList diff = matchObject.diff_main(temp,sensitisersLower[j]); //Finds difference between strings
+                    for (int k = 0; k < diff.size();k++){
+                        if (diff.get(k).toString().contains("DELETE")) {
+                            delete += (diff.get(k).toString().length() -15); //Returned String contains 15 chars too many
+                        } else if (diff.get(k).toString().contains("INSERT")) {
+                            insert += (diff.get(k).toString().length() -15);//Returned String contains 15 chars too many
+                        } else if (diff.get(k).toString().contains("EQUAL")){
+                            equal += (diff.get(k).toString().length() -14);//Returned String contains 14 chars too many
+                        }
+                    }
+                    if (equal != 0) { //Avoid divide by zero exeption
+                        ratio = (float) ((equal / (equal + delete*0.8)) + (equal / (equal + insert*1.2))) / 2; //calculates a ratio, should probably be refined
+                        System.out.println("Ratio: "+ratio+ "   Delete: "+delete+"    Insert: "+insert+"    Equal: "+equal);
+                    }
+                    if (ratio > 0.8 && (equal-insert>0)) { //If the current word is "close enough", count it as a match. Note: this is too sensitive, but at the same time not sensitive enough. A smarter algorithm would be nice.
+                        modIngredients.add(sensitiserMatch + ingredients.get(i)); //Adds String sensitiserMatch if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
+                        System.out.println("Mostly matched sensitiser: "+temp+", "+sensitisersLower[j]);
+                        cont = true;
+                        break; //No point in evaluating the current ingredient further
+                    }
+
+                }
+            }
+
 
             if (cont) { //Element is already added to list
                 continue;
@@ -109,9 +172,9 @@ public class SearchEngine {
             modIngredients.add(ingredients.get(i)); //if no match, add element as detected
 
 
-            //index = Arrays.binarySearch(badStuff,temp);
+            //index = Arrays.binarySearch(endocrineDisruptors,temp);
  /*           System.out.println("Checking: "+temp+" Index: "+ index);
-            //String match = binarySearch(badStuff, temp);
+            //String match = binarySearch(endocrineDisruptors, temp);
 
             if (index <= -1) { //No match
                 modIngredients.add(ingredients.get(i)); //if no match, add element as detected
@@ -161,10 +224,10 @@ public class SearchEngine {
             char b0 = ingredients.get(i).charAt(0);
             char b1 = ingredients.get(i).charAt(1);
             String ingredientWord = ingredients.get(i);
-            int l = 0, r = badLength - 1;
+            int l = 0, r = endocrineLength - 1;
             while (l <= r) {
                 int m = l + (r - l) / 2;
-                String wordIndex = badStuff[m];
+                String wordIndex = endocrineDisruptors[m];
                 char a0 = wordIndex.charAt(0);
                 char a1 = wordIndex.charAt(1);
 
@@ -187,15 +250,15 @@ public class SearchEngine {
 
         }
         for(int i = 0; i < listSize; ++i) {
-            for (int j = 0; j< badLength; ++j){
+            for (int j = 0; j< endocrineLength; ++j){
 
 
                 String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toLowerCase();
-                if (temp.equals(badStuff[j])){
+                if (temp.equals(endocrineDisruptors[j])){
                     matches.add(temp);
-                    System.out.println("Matched: "+temp+", "+badStuff[j]);
+                    System.out.println("Matched: "+temp+", "+endocrineDisruptors[j]);
                 } else {
-                    System.out.println("Searched: "+temp+", "+badStuff[j]);
+                    System.out.println("Searched: "+temp+", "+endocrineDisruptors[j]);
                 }
 
                 //System.out.println("In loop at least");
@@ -205,7 +268,7 @@ public class SearchEngine {
 
 /*
 pattern = Pattern.compile(temp);
-                matcher = pattern.matcher(badStuff);
+                matcher = pattern.matcher(endocrineDisruptors);
                 if (matcher.lookingAt()) {
                     matches.add(temp);
                     System.out.println("Match: " + temp);
@@ -222,14 +285,14 @@ pattern = Pattern.compile(temp);
 
 k=(int) (10-0.3*ingredients.get(i).length());
             if (k<0) {k =0;} else if (k>5) {k=5;}
-System.out.println(mismatch.searchString(badStuff,
+System.out.println(mismatch.searchString(endocrineDisruptors,
                     ingredients.get(i), k));
 
 
         for (String word : ingredients) {
             k=(int)Math.exp(31/word.length())-1;
             System.out.println("Searching: "+word);
-            if ( mismatch.searchString(badStuff,
+            if ( mismatch.searchString(endocrineDisruptors,
                     word, k)[0] != -1) {
                 matches.add(word);
 
@@ -294,7 +357,7 @@ System.out.println(mismatch.searchString(badStuff,
         Allocation input = null;
         input.copyFrom(ingredients);
         Allocation output = input;
-        search.set_listOfBadStuff(bob);
+        search.set_listOfendocrineDisruptors(bob);
 
         search.forEach_stringSearch(input, output);
         output.copyTo(matches);

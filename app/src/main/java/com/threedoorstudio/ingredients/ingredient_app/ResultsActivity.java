@@ -35,7 +35,8 @@ public class ResultsActivity extends Activity {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private String matchKeyword = "  --0AAA "; //Enables to check for "  --0AA", to see if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
+    private String endocrineKeyword = "  --0AAA "; //Enables to check for "  --0AAA ", to see if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
+    private String sensitiserKeyword = "  --0AAB ";
 
     List<String> wordsList;
 
@@ -193,11 +194,16 @@ public class ResultsActivity extends Activity {
             // - replace the contents of the view with that element
             //holder.mTextView.setText(mDataset[position]);
 
-            if (mDataset[position].contains(matchKeyword)) {
+            if (mDataset[position].contains(endocrineKeyword)) {
                 holder.mTextView.setBackgroundColor(Color.RED);
 
-                holder.mTextView.setText(mDataset[position].replaceAll(matchKeyword, ""));
-            } else {
+                holder.mTextView.setText(mDataset[position].replaceAll(endocrineKeyword, ""));
+
+            } else if (mDataset[position].contains(sensitiserKeyword)) {
+                holder.mTextView.setBackgroundColor(Color.YELLOW);
+                holder.mTextView.setText(mDataset[position].replaceAll(sensitiserKeyword, ""));
+            }
+            else {
                 holder.mTextView.setBackgroundColor(Color.WHITE);
                 holder.mTextView.setText(mDataset[position]);
             }

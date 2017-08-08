@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.renderscript.*;
 
+import com.devddagnet.bright.lib.Bright;
 import com.threedoorstudio.ingredients_app.ScriptC_contrast;
 
 import jp.co.cyberagent.android.gpuimage.GPUImage;
@@ -29,43 +30,69 @@ import jp.co.cyberagent.android.gpuimage.GPUImageSobelEdgeDetection;
  */
 
 public class BitmapPrimer {
-    
+
+    static float[] noiseReductionKernel =
+            {(float) 0.111, (float) 0.111, (float) 0.111,
+                    (float) 0.111, (float) 0.12, (float) 0.111,
+                    (float) 0.111, (float) 0.111, (float) 0.111};
     
 
 
 
     public static Bitmap primeBitmap(Context ctx, Bitmap inMap) {
         System.out.println("In primeBitmap");
-        //RenderScript rs = RenderScript.create(ctx);
+        RenderScript rs = RenderScript.create(ctx);
 
-        float[] concolutionKernel = {};
+        ScriptC_contrast contrast = new ScriptC_contrast(rs);
 
-        GPUImage mGPUImage = new GPUImage(ctx);
+        GPUImage mGPUImage1 = new GPUImage(ctx);
 
         GPUImageFilterGroup group = new GPUImageFilterGroup();
+        group.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
+        //group.addFilter(new GPUImageGrayscaleFilter());
+        group.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
 
-        group.addFilter(new GPUImageBrightnessFilter((float) 0.1));
-        group.addFilter(new GPUImageGrayscaleFilter());
-        group.addFilter(new GPUImageContrastFilter(10));
+        mGPUImage1.setFilter(group);
+
+        Bitmap tempMap1 = mGPUImage1.getBitmapWithFilterApplied(inMap);
+
+        //int luminance = (int) (1.5*(Bright.setup(Bright.Config.RELATIVE | Bright.Config.PERFORMANCE).brightness(tempMap1)));
+
+        int luminance = 160;
+
+        System.out.println("Average luminance: "+luminance);
+
+        contrast.set_threshold(luminance);
+
+        Bitmap tempMap2 = Bitmap.createBitmap(tempMap1.getWidth(), tempMap1.getHeight(), tempMap1.getConfig());
+        Allocation inAllocation = Allocation.createFromBitmap(rs, tempMap1);
+        Allocation outAllocation = Allocation.createFromBitmap(rs, tempMap2);
+        contrast.forEach_contrastAndBW(inAllocation, outAllocation);
+        outAllocation.copyTo(tempMap2);
+        rs.finish();
+        rs.destroy();
+
+
+        //group.addFilter(new GPUImageBrightnessFilter((float) 0.1));
+        GPUImage mGPUImage2 = new GPUImage(ctx);
+        GPUImageFilterGroup group1 = new GPUImageFilterGroup();
+        group1.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
+        group1.addFilter(new GPUImageContrastFilter(10));
+        group1.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
         //group.addFilter(new GPUImageSobelEdgeDetection());
         //group.addFilter(new GPUImageKuwaharaFilter(1));
-        group.addFilter(new GPUImageSharpenFilter(5));
+        group1.addFilter(new GPUImageSharpenFilter(5));
+        group1.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
 
-        mGPUImage.setFilter(group);
-
-
-        Bitmap outMap = mGPUImage.getBitmapWithFilterApplied(inMap);
-/*
-        ScriptC_contrast contrast = new ScriptC_contrast(rs); //The following is basically just what's needed to communicate with renderscript, though I'm not sure if both finish and destroy is necessary. Anyway, didn't seem to do any harm
+        mGPUImage2.setFilter(group1);
 
 
-        Bitmap outMap = Bitmap.createBitmap(inMap.getWidth(), inMap.getHeight(), inMap.getConfig());
-        Allocation inAllocation = Allocation.createFromBitmap(rs, inMap);
-        Allocation outAllocation = Allocation.createFromBitmap(rs, outMap);
-        contrast.forEach_contrastAndBW(inAllocation, outAllocation);
-        outAllocation.copyTo(outMap);
-        rs.finish();
-        rs.destroy();*/
+        Bitmap outMap = mGPUImage2.getBitmapWithFilterApplied(tempMap2);
+
+         //The following is basically just what's needed to communicate with renderscript, though I'm not sure if both finish and destroy is necessary. Anyway, didn't seem to do any harm
+
+
+
         System.out.println("returns outMap");
         return outMap; //Returns treated bitmap to OcrEngine
 

@@ -24,6 +24,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -44,6 +45,8 @@ public class OcrEngine {
     private static List<String> tempWordsArrayList = new ArrayList<String>();
     private static List<String> wordsArrayList = new ArrayList<String>();
 
+    static diff_match_patch matchObject = new diff_match_patch();
+
     //SparseArray text = new SparseArray();
 /*
     public OcrEngine(Context context) {
@@ -52,6 +55,7 @@ public class OcrEngine {
 */
     static void setValues(Context context, Bitmap bmp) {
         c = context;
+        Boolean hasWordIngredientAppeared = false;
 
         System.out.println(bmp);
 
@@ -87,12 +91,42 @@ public class OcrEngine {
         detectedText = ""; //Extracing text in various way down here, needs to be cleaned up eventually
         for (int i = 0; i < textBlocks.size(); i++) {
             TextBlock textBlock = textBlocks.valueAt(i);
-            if (textBlock != null && textBlock.getValue() != null && textBlock.getValue().length() >2) {
-                detectedText += textBlock.getValue().replaceAll("[\n\r]", "");
+
+            /*float delete = 0;
+            int numDeletes = 0;
+            float insert = 0;
+            float equal = 0;
+            float ratio = 0;
+            LinkedList diff = matchObject.diff_main("ingredi",textBlock.getValue().toLowerCase()); //Finds difference between strings
+            for (int k = 0; k < diff.size();k++){
+                System.out.println("Reading textblock: "+diff.get(k));
+                if (diff.get(k).toString().contains("DELETE")) {
+                    delete += (diff.get(k).toString().length() -15);//Returned String contains 15 chars too many
+                    numDeletes +=1;
+                } else if (diff.get(k).toString().contains("INSERT")) {
+                    insert += (diff.get(k).toString().length() -15);//Returned String contains 15 chars too many
+                } else if (diff.get(k).toString().contains("EQUAL")){
+                    equal += (diff.get(k).toString().length() -14);//Returned String contains 14 chars too many
+                }
+            }
+            if (equal != 0) { //Avoid divide by zero exeption
+                ratio = (float) (equal / (equal + insert)); //hopefully this gives a usable ratio
+                System.out.println("Ratio to look for 'ingredi': "+ratio+ "   Delete: "+delete+"    Insert: "+insert+"    Equal: "+equal);
+            }
+            if (ratio > 0.9 && (equal-insert>0) && numDeletes<4) { //If the current word "ingredi" is found "close enough", count it as a match.
+                hasWordIngredientAppeared = true;
+            }
+*/
+            if (textBlock.getValue().toLowerCase().contains("ingredi") || textBlock.getValue().toLowerCase().contains("gredien")) {
+                hasWordIngredientAppeared = true;
+            }
+
+            if (hasWordIngredientAppeared && textBlock != null && textBlock.getValue() != null && textBlock.getValue().length() >2) {
+                detectedText += textBlock.getValue().replaceAll("[\n\r]", "").replaceAll(" ", "");
                 if (detectedText.endsWith("-")) {
                     detectedText = detectedText.substring(0, detectedText.length() - 1);
                 } else
-                detectedText += " ";
+                detectedText += "";
 
             }
         }
@@ -120,6 +154,8 @@ public class OcrEngine {
                 }
             }
         }
+
+
 
         wordsArrayList.clear();
         tempWordsArrayList = Arrays.asList(detectedText.split("(?=[,.])|\\s+"));
