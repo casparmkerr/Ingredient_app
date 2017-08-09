@@ -30,6 +30,13 @@
 
         android:layout_below="@+id/imageView2" />
 
+    <TextView
+        android:id="@+id/waitingText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/rec_IngredientList"
+        android:layout_centerHorizontal="true"
+        android:text="" />
 
 
 </RelativeLayout>

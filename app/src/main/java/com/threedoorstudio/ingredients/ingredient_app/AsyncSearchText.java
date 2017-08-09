@@ -17,6 +17,8 @@ public class AsyncSearchText extends AsyncTask<Void, Void, String[]> {
         this.delegate = delegate;
     }
 
+
+
     @Override
     protected String[] doInBackground(Void... voids) {
         OcrEngine.execute();

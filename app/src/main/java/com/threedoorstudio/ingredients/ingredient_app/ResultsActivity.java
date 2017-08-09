@@ -39,6 +39,7 @@ public class ResultsActivity extends Activity implements AsyncSearchText.AsyncRe
     private RecyclerView.LayoutManager mLayoutManager;
     private String endocrineKeyword = "  --0AAA "; //Enables to check for "  --0AAA ", to see if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
     private String sensitiserKeyword = "  --0AAB ";
+    private TextView waitingText;
 
     List<String> wordsList;
 
@@ -63,7 +64,7 @@ public class ResultsActivity extends Activity implements AsyncSearchText.AsyncRe
 
         // specify an adapter (see also next example)
 
-
+        waitingText = findViewById(R.id.waitingText);
 
         Bundle extras = getIntent().getExtras(); //Gets image filepath
         String path = extras.getString("filePathString");
@@ -78,9 +79,13 @@ public class ResultsActivity extends Activity implements AsyncSearchText.AsyncRe
         new AsyncSearchText(this).execute();
 
 
+        waitingText.setText("Please wait");
 
 
 
+
+
+/*
         if (path != null) {
 
 
@@ -97,7 +102,7 @@ public class ResultsActivity extends Activity implements AsyncSearchText.AsyncRe
                 }
 
 
-            }*/
+            }
         }else {System.out.println("bmp is null");}
 
 
@@ -126,6 +131,7 @@ public class ResultsActivity extends Activity implements AsyncSearchText.AsyncRe
     }
 
     void setPicureDisplay(){
+
         ImageView mImg = findViewById(R.id.imageView2); //Finds imageview to display image
 
         Bitmap bmp1 = OcrEngine.getBitmap(); //gets treated bitmap
@@ -155,7 +161,7 @@ public class ResultsActivity extends Activity implements AsyncSearchText.AsyncRe
 
     @Override
     public void processFinish(String[] output) {
-
+        waitingText.setText("");
         ingredients = output;
         setPicureDisplay();
         createRecyclerView(ingredients);
