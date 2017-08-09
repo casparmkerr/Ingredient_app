@@ -27,6 +27,7 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
+import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
@@ -47,6 +48,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+
+
 import com.threedoorstudio.ingredients.ingredient_app.AutoFitTextureView;
 import com.threedoorstudio.ingredients.ingredient_app.R;
 
@@ -61,6 +64,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+
+import static android.hardware.camera2.CameraCharacteristics.CONTROL_MAX_REGIONS_AE;
+import static android.hardware.camera2.CameraCharacteristics.CONTROL_MAX_REGIONS_AF;
+import static android.hardware.camera2.CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE;
 
 public class Camera2BasicFragment extends Fragment
         implements View.OnClickListener, FragmentCompat.OnRequestPermissionsResultCallback {
@@ -121,6 +128,9 @@ public class Camera2BasicFragment extends Fragment
      */
     private static final int MAX_PREVIEW_HEIGHT = 1080;
 
+
+
+
     /**
      * {@link TextureView.SurfaceTextureListener} handles several lifecycle events on a
      * {@link TextureView}.
@@ -173,6 +183,9 @@ public class Camera2BasicFragment extends Fragment
      * The {@link android.util.Size} of camera preview.
      */
     private Size mPreviewSize;
+
+
+    private MeteringRectangle meteringRectangle[] = new MeteringRectangle[1];
 
     /**
      * {@link CameraDevice.StateCallback} is called when {@link CameraDevice} changes its state.
@@ -275,6 +288,14 @@ public class Camera2BasicFragment extends Fragment
      * Orientation of the camera sensor
      */
     private int mSensorOrientation;
+
+    private int afRegions;
+
+    private int aeRegions;
+
+    private int halfHeight;
+
+    private int halfWidth;
 
     private ImageView imgView;
 
@@ -437,6 +458,8 @@ public class Camera2BasicFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+
         return inflater.inflate(R.layout.fragment_camera2_basic, container, false);
     }
 
@@ -610,6 +633,15 @@ public class Camera2BasicFragment extends Fragment
                 Boolean available = characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
                 mFlashSupported = available == null ? false : available;
 
+                Size sensorSize = characteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE);
+                halfHeight = (sensorSize.getWidth()/2)-75;
+                halfWidth = (sensorSize.getHeight()/2)-75;
+
+                meteringRectangle[0] = new MeteringRectangle(halfWidth, halfHeight, 150,150,MeteringRectangle.METERING_WEIGHT_MAX);
+                afRegions = characteristics.get(CONTROL_MAX_REGIONS_AF);
+                aeRegions = characteristics.get(CONTROL_MAX_REGIONS_AE);
+
+
                 mCameraId = cameraId;
                 return;
             }
@@ -735,6 +767,16 @@ public class Camera2BasicFragment extends Fragment
                             // When the session is ready, we start displaying the preview.
                             mCaptureSession = cameraCaptureSession;
                             try {
+
+                                if (afRegions>0) {
+                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, meteringRectangle);
+                                    System.out.println("afRegions > 0");
+                                }
+                                if (aeRegions>0) {
+                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, meteringRectangle);
+                                    System.out.println("aeRegions > 0");
+                                }
+
                                 // Auto focus should be continuous for camera preview.
                                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
                                         CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);

@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -25,12 +26,13 @@ import android.widget.Toast;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class ResultsActivity extends Activity {
+public class ResultsActivity extends Activity implements AsyncSearchText.AsyncResponse {
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -39,6 +41,10 @@ public class ResultsActivity extends Activity {
     private String sensitiserKeyword = "  --0AAB ";
 
     List<String> wordsList;
+
+    //AsyncSearchText searchText = new AsyncSearchText();
+
+    String[] ingredients;
 
     //ImageView mImg;
     //static String path;
@@ -66,6 +72,11 @@ public class ResultsActivity extends Activity {
 
         System.out.println("Path in Resultsactivity: " + path); //Again, those paths are sometimes evil, so I like checking
 
+        OcrEngine.setContext(this);
+        OcrEngine.setValues(path);
+
+        new AsyncSearchText(this).execute();
+
 
 
 
@@ -73,37 +84,7 @@ public class ResultsActivity extends Activity {
         if (path != null) {
 
 
-            Bitmap bmp = BitmapFactory.decodeFile(path); //Creating bitmap
-
-
-            try { //Needed to rotate pictures taken with samsung phones to correct orientation
-                ExifInterface exif=new ExifInterface(path);
-                Log.d("EXIF value", exif.getAttribute(ExifInterface.TAG_ORIENTATION));
-                if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("6")){
-                    bmp=rotate(bmp, 90);
-                }else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("8")){
-                    bmp=rotate(bmp, 270);
-                }else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("3")) {
-                    bmp = rotate(bmp, 180);
-
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
-
-
-            if (bmp != null) {
-                OcrEngine.setValues(this, bmp);
-            } //Passes image to text recognition
-            else {
-                System.out.println("Shit");
-            }
-
-
-
-/*
+            /*
             if (matches.size() == 0 || matches == null) {
                 textView.append("Yay, no matches!");
                 /*for (String word : wordsList) {
@@ -119,38 +100,68 @@ public class ResultsActivity extends Activity {
             }*/
         }else {System.out.println("bmp is null");}
 
-        ImageView mImg = findViewById(R.id.imageView2); //Finds imageview to display image
 
-        Bitmap bmp1 = OcrEngine.getBitmap(); //gets treated bitmap
-        mImg.setImageBitmap(bmp1);
-        List<String> wordsList = OcrEngine.getWords(); //gets list of recognized words
+
         //TextView textView = (TextView) findViewById(R.id.textView1);
         //textView.setText(null);
-        SearchEngine search = new SearchEngine() {
-        };
-        List<String> modIngredients = null;
-        modIngredients = search.matchWords(wordsList);
-        RelativeLayout rl = (RelativeLayout)findViewById(R.id.resActivity);
 
+        //RelativeLayout rl = (RelativeLayout)findViewById(R.id.resActivity);
+/*
         if (modIngredients.equals(wordsList)) {
 
             rl.setBackgroundColor(Color.GREEN);
         } else {
 
             rl.setBackgroundColor(Color.RED);
-        }
+        }*/
 
         //Arrays.sort(modIngredients);
 
         //modIngredients.removeAll(Collections.singleton(null));
 
-        String[] ingredients = modIngredients.toArray(new String[0]);
+        //String ingredientsList[] = pathToTextList(path);
+
+
+
+    }
+
+    void setPicureDisplay(){
+        ImageView mImg = findViewById(R.id.imageView2); //Finds imageview to display image
+
+        Bitmap bmp1 = OcrEngine.getBitmap(); //gets treated bitmap
+        mImg.setImageBitmap(bmp1);
+    }
+/*
+    String[] pathToTextList(String path) {
+        OcrEngine.setValues(this, path);
+        List<String> wordsList = OcrEngine.getWords(); //gets list of recognized words
+
+        SearchEngine search = new SearchEngine();
+        List<String> modIngredients = null;
+        modIngredients = search.matchWords(wordsList);
+
+        ingredients = modIngredients.toArray(new String[0]);
         Arrays.sort(ingredients);
+
+        return ingredients;
+
+    }
+*/
+    void createRecyclerView(String[] ingredients){
         mAdapter = new MyAdapter(ingredients);
         mRecyclerView.setAdapter(mAdapter); //Starts the "Recyclerview" listview.
 
+    }
 
-        }
+    @Override
+    public void processFinish(String[] output) {
+
+        ingredients = output;
+        setPicureDisplay();
+        createRecyclerView(ingredients);
+
+    }
+
 
     public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         private String[] mDataset;
@@ -219,19 +230,6 @@ public class ResultsActivity extends Activity {
         }
     }
 
-    public static Bitmap rotate(Bitmap bitmap, int degree) {
-        int w = bitmap.getWidth();
-        int h = bitmap.getHeight();
-
-        Matrix mtx = new Matrix();
-        mtx.postRotate(degree);
-
-        return Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
-    }
-
-
-
-
 
 
 
@@ -245,3 +243,5 @@ public class ResultsActivity extends Activity {
 
 
 }
+
+

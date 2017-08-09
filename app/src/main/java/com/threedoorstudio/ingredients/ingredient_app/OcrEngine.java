@@ -37,6 +37,7 @@ public class OcrEngine {
 
 
     static Context c;
+    static String p;
     Frame frame;
     static String text1;
     static String detectedText;
@@ -47,26 +48,38 @@ public class OcrEngine {
 
     static diff_match_patch matchObject = new diff_match_patch();
 
+
+
     //SparseArray text = new SparseArray();
 /*
     public OcrEngine(Context context) {
         c = context;
     } //Recieves context necesarry to build the TextRecognizer. Could be merged with setValues
+
+
 */
-    static void setValues(Context context, Bitmap bmp) {
+    static void setContext(Context context) {
         c = context;
+    }
+
+    static void setValues(String path) {
+        p = path;
+    }
+
+    static void execute() {
+        //c = context;
         Boolean hasWordIngredientAppeared = false;
 
-        System.out.println(bmp);
+        System.out.println(p);
 
 
         //Bitmap bmp = BitmapFactory.decodeFile( PathToFileString );
-        if (bmp == null) { //Had a bunch of problems with file management, so this tells console if there's no image
-            Toast.makeText(c, "Null Bitmap!", Toast.LENGTH_LONG).show();
-            System.out.println("Null Bitmap");
+        if (p == null) { //Had a bunch of problems with file management, so this tells console if there's no image
+            Toast.makeText(c, "Null Path!", Toast.LENGTH_LONG).show();
+            System.out.println("Null Path");
         }
 
-        treatedBmp = BitmapPrimer.primeBitmap(c, bmp); //calls function primeBitmap to prime the bitmap for OCR
+        treatedBmp = BitmapPrimer.primeBitmap(c, p); //calls function primeBitmap to prime the bitmap for OCR
         //treatedBmp = alphaToRGB(argbToAlpha(bmp));
         TextRecognizer textRecognizer = new TextRecognizer.Builder(c).build(); //Initiating Mobile Vision textRecognizer
         Frame outputFrame = new Frame.Builder().setBitmap(treatedBmp).build();
@@ -180,6 +193,10 @@ public class OcrEngine {
     }
 
     static List<String> getWords() {
+
+
+
+
         return wordsArrayList;
     } //Returns text as ArrayList
 

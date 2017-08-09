@@ -61,6 +61,9 @@ public class SearchEngine {
 
     ArrayList<String> matches = new ArrayList<String>();
     public ArrayList<String> matchWords(List<String> ingredients) {
+
+
+
         System.out.println("In SearchEngine");
         System.out.println("Unsorted: "+Arrays.toString(endocrineDisruptors));
         Arrays.sort(endocrineDisruptors);
@@ -189,184 +192,16 @@ public class SearchEngine {
 
 
 
-/*
-        MismatchSearch mismatch = new MismatchSearch() {
-            @Override
-            public Object processBytes(byte[] pattern, int k) {
-                return null;
-            }
 
-            @Override
-            public Object processChars(char[] pattern, int k) {
-                return null;
-            }
-
-            @Override
-            public int[] searchBytes(byte[] text, int textStart, int textEnd, byte[] pattern, Object processed, int k) {
-                return new int[0];
-            }
-
-            @Override
-            public int[] searchChars(char[] text, int textStart, int textEnd, char[] pattern, Object processed, int k) {
-                return new int[0];
-            }
-        };
-        ArrayList<int[]> misma = new ArrayList<>();
-
-        Pattern pattern;
-        Matcher matcher;
-        // Returns index of x if it is present in arr[], else
-        // return -1
-
-
-        for(int i = 0; i < listSize; ++i) {
-            if (ingredients.get(i).length()<4){continue;}
-            char b0 = ingredients.get(i).charAt(0);
-            char b1 = ingredients.get(i).charAt(1);
-            String ingredientWord = ingredients.get(i);
-            int l = 0, r = endocrineLength - 1;
-            while (l <= r) {
-                int m = l + (r - l) / 2;
-                String wordIndex = endocrineDisruptors[m];
-                char a0 = wordIndex.charAt(0);
-                char a1 = wordIndex.charAt(1);
-
-                // Check if x is present at mid
-                if (ingredientWord == wordIndex) {
-                    matches.add(ingredientWord);
-                }
-
-
-                // If x greater, ignore left half
-                if (wordIndex < ingredientWord)
-                    l = m + 1;
-
-                    // If x is smaller, ignore right half
-                else
-                    r = m - 1;
-            }
-
-            // if we reach here, then element was not present
-
-        }
-        for(int i = 0; i < listSize; ++i) {
-            for (int j = 0; j< endocrineLength; ++j){
-
-
-                String temp = ingredients.get(i).replaceAll("[^a-zA-Z ]", "").toLowerCase();
-                if (temp.equals(endocrineDisruptors[j])){
-                    matches.add(temp);
-                    System.out.println("Matched: "+temp+", "+endocrineDisruptors[j]);
-                } else {
-                    System.out.println("Searched: "+temp+", "+endocrineDisruptors[j]);
-                }
-
-                //System.out.println("In loop at least");
-
-            }
-        }
-
-/*
-pattern = Pattern.compile(temp);
-                matcher = pattern.matcher(endocrineDisruptors);
-                if (matcher.lookingAt()) {
-                    matches.add(temp);
-                    System.out.println("Match: " + temp);
-                } else {
-
-                    System.out.println("Searching: " + temp);
-                }
-
-
-
-
-
-
-
-k=(int) (10-0.3*ingredients.get(i).length());
-            if (k<0) {k =0;} else if (k>5) {k=5;}
-System.out.println(mismatch.searchString(endocrineDisruptors,
-                    ingredients.get(i), k));
-
-
-        for (String word : ingredients) {
-            k=(int)Math.exp(31/word.length())-1;
-            System.out.println("Searching: "+word);
-            if ( mismatch.searchString(endocrineDisruptors,
-                    word, k)[0] != -1) {
-                matches.add(word);
-
-            }
-
-        }*/
 
         return modIngredients;
 
     }
 
-    public static String binarySearch(String[] a, String x) { //Performs binary search, though extremely badly, it seems.
-        int low = 0;
-        int high = a.length - 1;
-        int mid;
-
-        while (low <= high) {
-            mid = (low + high) / 2;
-
-            if (a[mid].compareTo(x) < 0) {
-                low = mid + 1;
-            } else if (a[mid].compareTo(x) > 0) {
-                high = mid - 1;
-            } else {
-                return x;
-            }
-        }
-        return null;
-
-
-    }
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-    /*char[] bob = {'B','E','S','T','I','L','L','E','R',' ','H','E','I',' ','D','U'};
-
-
-
-
-    public String[] matchWords(Context ctx, ArrayList<String> ingredients) {
-        System.out.println("In searchEngine");
-
-        int arraylength = ingredients.size();
-        String[] matches = new String[arraylength];
-        RenderScript rs = RenderScript.create(ctx);
-        ScriptC_search search = new ScriptC_search(rs); //The following is basically just what's needed to communicate with renderscript, though I'm not sure if both finish and destroy is necessary. Anyway, didn't seem to do any harm
-
-
-        //Type ingredientType = Type.createX(rs, ingredients, arraylength);
-
-        Allocation input = null;
-        input.copyFrom(ingredients);
-        Allocation output = input;
-        search.set_listOfendocrineDisruptors(bob);
-
-        search.forEach_stringSearch(input, output);
-        output.copyTo(matches);
-        rs.finish();
-        rs.destroy();
-        System.out.println("returns outMap"+matches);
-        return matches;
-
-    }*/
 
 
 }

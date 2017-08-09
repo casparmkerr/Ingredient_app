@@ -2,16 +2,22 @@ package com.threedoorstudio.ingredients.ingredient_app;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.renderscript.*;
+import android.util.Log;
 
 import com.devddagnet.bright.lib.Bright;
 import com.threedoorstudio.ingredients_app.ScriptC_contrast;
+
+import java.io.IOException;
 
 import jp.co.cyberagent.android.gpuimage.GPUImage;
 import jp.co.cyberagent.android.gpuimage.GPUImage3x3ConvolutionFilter;
@@ -39,7 +45,26 @@ public class BitmapPrimer {
 
 
 
-    public static Bitmap primeBitmap(Context ctx, Bitmap inMap) {
+    public static Bitmap primeBitmap(Context ctx, String path) {
+        Bitmap inMap = BitmapFactory.decodeFile(path); //Creating bitmap
+
+
+        try { //Needed to rotate pictures taken with samsung phones to correct orientation
+            ExifInterface exif=new ExifInterface(path);
+            Log.d("EXIF value", exif.getAttribute(ExifInterface.TAG_ORIENTATION));
+            if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("6")){
+                inMap=rotate(inMap, 90);
+            }else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("8")){
+                inMap=rotate(inMap, 270);
+            }else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("3")) {
+                inMap = rotate(inMap, 180);
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         System.out.println("In primeBitmap");
         RenderScript rs = RenderScript.create(ctx);
 
@@ -77,12 +102,14 @@ public class BitmapPrimer {
         GPUImage mGPUImage2 = new GPUImage(ctx);
         GPUImageFilterGroup group1 = new GPUImageFilterGroup();
         group1.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
+        group1.addFilter(new GPUImageSharpenFilter(5));
+        group1.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
         group1.addFilter(new GPUImageContrastFilter(10));
         group1.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
         //group.addFilter(new GPUImageSobelEdgeDetection());
         //group.addFilter(new GPUImageKuwaharaFilter(1));
-        group1.addFilter(new GPUImageSharpenFilter(5));
-        group1.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
+
+
 
         mGPUImage2.setFilter(group1);
 
@@ -97,6 +124,18 @@ public class BitmapPrimer {
         return outMap; //Returns treated bitmap to OcrEngine
 
     }
+
+    public static Bitmap rotate(Bitmap bitmap, int degree) {
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+
+        Matrix mtx = new Matrix();
+        mtx.postRotate(degree);
+
+        return Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
+    }
+
+
 
 //Old, horribly slow methods that are currently replaced by GPUImage and in-built image effects, though not well enough:
 /*
