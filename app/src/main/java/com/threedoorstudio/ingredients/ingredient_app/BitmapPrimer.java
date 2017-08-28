@@ -29,6 +29,9 @@ import jp.co.cyberagent.android.gpuimage.GPUImageGrayscaleFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageKuwaharaFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageSharpenFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageSobelEdgeDetection;
+import jp.co.cyberagent.android.gpuimage.GPUImageWeakPixelInclusionFilter;
+
+import static java.lang.Math.max;
 
 
 /**
@@ -63,32 +66,87 @@ public class BitmapPrimer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("Transformed Bitmap height, width = "+ inMap.getHeight() +", "+ inMap.getWidth());
 
+        Bitmap resizedbitmap1 = inMap;
+        //Cropping bitmap:
+        if (inMap.getHeight()>inMap.getWidth()) {
+            resizedbitmap1 = Bitmap.createBitmap(inMap, inMap.getWidth() / 8, 3 * inMap.getHeight() / 10, (6 * inMap.getWidth() / 8), 4 * (inMap.getHeight() / 10));
+        } else {
+            resizedbitmap1 = Bitmap.createBitmap(inMap, 3 * inMap.getWidth() / 10, inMap.getHeight() / 8, 4 * (inMap.getWidth() / 10), (6 * inMap.getHeight() / 8));
+        }
+        //Bitmap resizedbitmap1 = inMap;
 
         System.out.println("In primeBitmap");
         RenderScript rs = RenderScript.create(ctx);
-
+        int luminance = findAverageBrightness(resizedbitmap1);
         ScriptC_contrast contrast = new ScriptC_contrast(rs);
 
         GPUImage mGPUImage1 = new GPUImage(ctx);
 
         GPUImageFilterGroup group = new GPUImageFilterGroup();
         group.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
-        //group.addFilter(new GPUImageGrayscaleFilter());
+
+        group.addFilter(new GPUImageSharpenFilter(4));
+        //group.addFilter(new GPUImageContrastFilter(2));
         group.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
+        if (luminance<130) {
+            group.addFilter(new GPUImageBrightnessFilter((float) 0.1));
+        }
+        group.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
+        //group.addFilter(new GPUImageKuwaharaFilter(1));
+        group.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
+
+
+        //group.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
 
         mGPUImage1.setFilter(group);
 
-        Bitmap tempMap1 = mGPUImage1.getBitmapWithFilterApplied(inMap);
+        Bitmap tempMap1 = mGPUImage1.getBitmapWithFilterApplied(resizedbitmap1);
 
         //int luminance = (int) (1.5*(Bright.setup(Bright.Config.RELATIVE | Bright.Config.PERFORMANCE).brightness(tempMap1)));
 
-        int luminance = 160;
+
+
+        float hv = findHues(tempMap1);
+
+        //contrast.set_hue0(hv[0]);
+
+        int firsHueLimit = (int) (hv-22)%45;
+
+        int[] hueLimits = new int[8];
+
+        for (int i = 0; i<hueLimits.length;i++) {
+
+            hueLimits[i] = (firsHueLimit+i*45)%360;
+
+        }
+
+        contrast.set_hueLimit0(hueLimits[0]);
+        contrast.set_hueLimit1(hueLimits[1]);
+        contrast.set_hueLimit2(hueLimits[2]);
+        contrast.set_hueLimit3(hueLimits[3]);
+        contrast.set_hueLimit4(hueLimits[4]);
+        contrast.set_hueLimit5(hueLimits[5]);
+        contrast.set_hueLimit6(hueLimits[6]);
+        contrast.set_hueLimit7(hueLimits[7]);
+/*
+        contrast.set_hue1(hv[1]);
+        contrast.set_hue2(hv[2]);
+
+        contrast.set_value0(hv[3]);
+        contrast.set_value1(hv[4]);
+        contrast.set_value2(hv[5]);
+
+        for (int i = 0; i< hv.length;i++) {
+            System.out.println("hv: " + hv[i]);
+        }*/
+
 
         System.out.println("Average luminance: "+luminance);
 
         contrast.set_threshold(luminance);
-
+//The following is basically just what's needed to communicate with renderscript, though I'm not sure if both finish and destroy is necessary. Anyway, didn't seem to do any harm
         Bitmap tempMap2 = Bitmap.createBitmap(tempMap1.getWidth(), tempMap1.getHeight(), tempMap1.getConfig());
         Allocation inAllocation = Allocation.createFromBitmap(rs, tempMap1);
         Allocation outAllocation = Allocation.createFromBitmap(rs, tempMap2);
@@ -101,11 +159,17 @@ public class BitmapPrimer {
         //group.addFilter(new GPUImageBrightnessFilter((float) 0.1));
         GPUImage mGPUImage2 = new GPUImage(ctx);
         GPUImageFilterGroup group1 = new GPUImageFilterGroup();
+
         group1.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
-        group1.addFilter(new GPUImageSharpenFilter(5));
+
+        //group.addFilter(new GPUImageWeakPixelInclusionFilter());
+        group1.addFilter(new GPUImageSharpenFilter(8));
         group1.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
-        group1.addFilter(new GPUImageContrastFilter(10));
+        group1.addFilter(new GPUImageKuwaharaFilter(1));
+        group1.addFilter(new GPUImageContrastFilter(15));
+        group1.addFilter(new GPUImageKuwaharaFilter(1));
         group1.addFilter(new GPUImage3x3ConvolutionFilter(noiseReductionKernel));
+
         //group.addFilter(new GPUImageSobelEdgeDetection());
         //group.addFilter(new GPUImageKuwaharaFilter(1));
 
@@ -116,7 +180,7 @@ public class BitmapPrimer {
 
         Bitmap outMap = mGPUImage2.getBitmapWithFilterApplied(tempMap2);
 
-         //The following is basically just what's needed to communicate with renderscript, though I'm not sure if both finish and destroy is necessary. Anyway, didn't seem to do any harm
+
 
 
 
@@ -134,6 +198,182 @@ public class BitmapPrimer {
 
         return Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
     }
+
+    private static int findAverageBrightness(Bitmap src) {
+        // image size
+        int width = src.getWidth();
+        int height = src.getHeight();
+
+        int sum = 0;
+        int num = 0;
+
+        // color information
+        int R, G, B;
+        int pixel;
+
+        // scan through all pixels
+        for(int x = width/2-100; x < width/2+100; x+=2) {
+            //System.out.println("Finding Brightness");
+            for(int y = height/2-100; y < height/2+100; ++y) {
+                // get pixel color
+                pixel = src.getPixel(x, y);
+
+                sum += (Color.red(pixel)+2*Color.green(pixel)+Color.blue(pixel))/4;
+
+                num++;
+
+            }
+        }
+        return (int) (sum/num);
+    }
+
+    private static float findHues(Bitmap src) {
+        // image size
+        int width = src.getWidth();
+        int height = src.getHeight();
+
+        float[] hsv = new float[3];
+        float[] hv = new float[6];
+        float hue0 = 1000;
+        float hue1 = 1000;
+        float hue2 = 1000;
+        float hue3 = 1000;
+        float hue4 = 1000;
+        float hue5 = 1000;
+        float hue6 = 1000;
+
+        float value0 = 1000;
+        float value1 = 1000;
+        float value2 = 1000;
+        float value3 = 1000;
+        float value4 = 1000;
+        float value5 = 1000;
+        float value6 = 1000;
+
+
+        int count0 = 2;
+        int count1 = 2;
+        int count2 = 2;
+        int count3 = 2;
+        int count4 = 2;
+        int count5 = 2;
+        int count6 = 2;
+
+        int pixel;
+
+        // scan through all pixels
+        for(int x = 2*width/5; x < 3*width/5; x+=2) {
+            //System.out.println("Finding Hue");
+            for(int y = 2*height/5; y < 3*height/5; y+=2) {
+                // get pixel color
+                pixel = src.getPixel(x, y);
+
+                //sum += (Color.red(pixel)+2*Color.green(pixel)+Color.blue(pixel))/4;
+                Color.RGBToHSV(Color.red(pixel),Color.green(pixel),Color.blue(pixel),hsv);
+
+                //if (hsv[0] >=0 && hsv[0] <30) {
+
+
+
+
+
+                if (hue0 == 1000) {
+                    hue0 = hsv[0];
+                    value0 = hsv[2];
+                } else if (hsv[0] < hue0+30 && hsv[0] > hue0-30 && hsv[2] < value0+0.1f && hsv[2] > value0-0.1f) {
+                    hue0 = ((count0-1)*hsv[0]+hue0)/count0;
+                    value0 = ((count0-1)*hsv[2]+value0)/count0;
+                    count0++;
+                } else if (hue1 == 1000){
+                    hue1 = hsv[0];
+                    value1 = hsv[2];
+                } else if (hsv[0] < hue1+30 && hsv[0] > hue1-30 && hsv[2] < value1+0.15f && hsv[2] > value1-0.15f){
+                    hue1 = ((count1-1)*hsv[0]+hue1)/count1;
+                    value1 = ((count1-1)*hsv[2]+value1)/count1;
+                    count1++;
+                } else if (hue2 == 1000){
+                    hue2 = hsv[0];
+                    value1 = hsv[2];
+                } else if (hsv[0] < hue2+30 && hsv[0] > hue2-30 && hsv[2] < value2+0.15f && hsv[2] > value2-0.15f){
+                    hue2 = ((count1-1)*hsv[0]+hue2)/count2;
+                    value2 = ((count2-1)*hsv[2]+value2)/count2;
+                    count2++;
+                } else if (hue3 == 1000){
+                    hue3 = hsv[0];
+                    value3 = hsv[2];
+                } else if (hsv[0] < hue3+30 && hsv[0] > hue3-30 && hsv[2] < value3+0.15f && hsv[2] > value3-0.15f){
+                    hue3 = ((count3-1)*hsv[0]+hue3)/count3;
+                    value3 = ((count3-1)*hsv[2]+value3)/count3;
+                    count3++;
+                } else if (hue4 == 1000){
+                    hue4 = hsv[0];
+                    value4 = hsv[2];
+                } else if (hsv[0] < hue4+30 && hsv[0] > hue4-30 && hsv[2] < value4+0.15f && hsv[2] > value4-0.15f){
+                    hue4 = ((count4-1)*hsv[0]+hue4)/count4;
+                    value4 = ((count4-1)*hsv[2]+value4)/count4;
+                    count4++;
+                } else if (hue5 == 1000){
+                    hue5 = hsv[0];
+                    value5 = hsv[2];
+                } else if (hsv[0] < hue5+30 && hsv[0] > hue5-30 && hsv[2] < value5+0.15f && hsv[2] > value5-0.15f){
+                    hue5 = ((count5-1)*hsv[0]+hue5)/count5;
+                    value5 = ((count5-1)*hsv[2]+value5)/count5;
+                    count5++;
+                } else if (hue6 == 1000) {
+                    hue6 = hsv[0];
+                    value6 = hsv[2];
+                } else {
+                    hue6 = ((count6-1)*hsv[0]+hue6)/count6;
+                    value6 = ((count6-1)*hsv[2]+value6)/count6;
+                    count6++;
+                }
+
+                //System.out.println("Hue, value: "+hsv[0]+ " , "+hsv[2]);
+/*
+                if (value0 == 1000) {
+                    value0 = hsv[2];
+                } else if (hsv[2] < value0+10 && hsv[2] > value0-10) {
+                    value0 = (hsv[2]+value0)/2;
+                } else if (value1 == 1000){
+                    value1 = hsv[2];
+                } else if (hsv[2] < value1+10 && hsv[2] > value1-10){
+                    value1 = (hsv[2]+value1)/2;
+                } else if (value2 == 1000) {
+                    value2 = hsv[2];
+                } else {
+                    value2 = (hsv[2]+value2)/2;
+                }
+*/
+            }
+        }
+
+        int maxCount = max(max(count0,count1),max(max(count2,count3),max(count4,count5)));
+        if (maxCount == count0) {
+            return value0;
+        } else if (maxCount == count1) {
+            return value1;
+        } else if (maxCount == count2) {
+            return value2;
+        } else if (maxCount == count3) {
+            return value3;
+        } else if (maxCount == count4) {
+            return value4;
+        } else if (maxCount == count5) {
+            return value5;
+        } else {
+            return value6;
+        }
+        /*hv[0] = hue0;
+        hv[1] = hue1;
+        hv[2] = hue2;
+
+        hv[3] = value0;
+        hv[4] = value1;
+        hv[5] = value2;*/
+
+
+    }
+
 
 
 

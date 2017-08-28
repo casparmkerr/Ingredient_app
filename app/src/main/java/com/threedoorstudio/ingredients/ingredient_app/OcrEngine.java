@@ -130,12 +130,13 @@ public class OcrEngine {
                 hasWordIngredientAppeared = true;
             }
 */
-            if (textBlock.getValue().toLowerCase().contains("ingredi") || textBlock.getValue().toLowerCase().contains("gredien")) {
+            if (textBlock.getValue().toLowerCase().contains("ingredi") || textBlock.getValue().toLowerCase().contains("gredien") || textBlock.getValue().toLowerCase().contains("edient") ||
+                    textBlock.getValue().toLowerCase().contains("contain")) {
                 hasWordIngredientAppeared = true;
             }
 
-            if (hasWordIngredientAppeared && textBlock != null && textBlock.getValue() != null && textBlock.getValue().length() >2) {
-                detectedText += textBlock.getValue().replaceAll("[\n\r]", "").replaceAll(" ", "");
+            if (textBlock != null && textBlock.getValue() != null && textBlock.getValue().length() >2) {
+                detectedText += textBlock.getValue().replaceAll("[\n\r]", "").replaceAll(" ", "").replaceAll("/", ",").replaceAll("[():]", ",");
                 if (detectedText.endsWith("-")) {
                     detectedText = detectedText.substring(0, detectedText.length() - 1);
                 } else
@@ -171,20 +172,36 @@ public class OcrEngine {
 
 
         wordsArrayList.clear();
-        tempWordsArrayList = Arrays.asList(detectedText.split("(?=[,.])|\\s+"));
+
+        tempWordsArrayList = Arrays.asList(detectedText.split("(?=[,.•])|\\s+"));
+
         tempWordsArrayList.removeAll(Collections.singleton(null));
+
         for (int i = 0; i<tempWordsArrayList.size();i++){
-            if (tempWordsArrayList.get(i).length()<3) {
+            String tempWord = tempWordsArrayList.get(i).replaceAll("[,.*•]" , "");
+
+            if (tempWord.length()<3) {
                 continue; //No point searching through words of shorter length than any substance in the database
-            } else if (tempWordsArrayList.get(i).length()>28){ //Sometimes it concatenates words that should not be concatenated; this might help be trying to identify new ingredients based upon capital letters.
-                String[] r = tempWordsArrayList.get(i).split("(?=\\p{Lu})"); //Might mess up long words beginning with a number followed by a capital letter, or when it detects a lower-case letter as upper-case.
-                for (int j = 0; j<r.length;j++) {
-                    wordsArrayList.add(r[j]);
+            } else if (tempWord.length()>28 && ! tempWord.equals(tempWord.toUpperCase())){ //Sometimes it concatenates words that should not be concatenated; this might help be trying to identify new ingredients based upon capital letters.
+                ArrayList<Integer> placestoSplit = new ArrayList<>();
+                ArrayList<String> diffWords = new ArrayList<>();
+                for (int k = 0; k<tempWord.length()-2;k++){
+                    if (tempWord.charAt(k) >= 'A' && tempWord.charAt(k) <= 'Z' && tempWord.charAt(k+1) >= 'a' && tempWord.charAt(k+1) <= 'z' && tempWord.charAt(k+2) >= 'a' && tempWord.charAt(k+2) <= 'z') {
+                        placestoSplit.add(k);
+                    }
+                }
+                for (int l = 0; l < placestoSplit.size()-1;l++) {
+                    diffWords.add(tempWord.substring(placestoSplit.get(l),placestoSplit.get(l+1)));
+                }
+
+                for (int j = 0; j<diffWords.size();j++) {
+                    wordsArrayList.add(diffWords.get(j));
                 }
             } else {
-                wordsArrayList.add(tempWordsArrayList.get(i));
+                wordsArrayList.add(tempWord);
             }
         }
+        wordsArrayList.removeAll(Collections.singleton(null));
         //detectedTextView.setText(detectedText);
         System.out.println("Text: " + detectedText);
         textRecognizer.release();

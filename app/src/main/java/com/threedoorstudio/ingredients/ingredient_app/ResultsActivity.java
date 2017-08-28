@@ -9,9 +9,11 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -20,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +39,7 @@ public class ResultsActivity extends Activity implements AsyncSearchText.AsyncRe
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
+    private RecyclerViewAdapter m2Adapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private String endocrineKeyword = "  --0AAA "; //Enables to check for "  --0AAA ", to see if it's a match. Makes sure the matched ingredients are easy to identify and end ut first when sorted later.
     private String sensitiserKeyword = "  --0AAB ";
@@ -154,7 +158,7 @@ public class ResultsActivity extends Activity implements AsyncSearchText.AsyncRe
     }
 */
     void createRecyclerView(String[] ingredients){
-        mAdapter = new MyAdapter(ingredients);
+        mAdapter = new RecyclerViewAdapter(getApplicationContext(), ingredients);
         mRecyclerView.setAdapter(mAdapter); //Starts the "Recyclerview" listview.
 
     }
@@ -169,7 +173,7 @@ public class ResultsActivity extends Activity implements AsyncSearchText.AsyncRe
     }
 
 
-    public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
+  /*  public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         private String[] mDataset;
 
         // Provide a reference to the views for each data item
@@ -179,10 +183,15 @@ public class ResultsActivity extends Activity implements AsyncSearchText.AsyncRe
 
 
             // each data item is just a string in this case
-            public TextView mTextView;
-            public ViewHolder(TextView v) {
+            public TextView textViewHeader;
+            public TextView textViewSubHeader;
+            public ConstraintLayout mConstraintLayout;
+
+            public ViewHolder(View v) {
                 super(v);
-                mTextView = v;
+                textViewHeader = (TextView) itemView.findViewById(R.id.textViewHeader);
+                textViewHeader = (TextView) itemView.findViewById(R.id.textViewSubheader);
+
             }
         }
 
@@ -196,9 +205,13 @@ public class ResultsActivity extends Activity implements AsyncSearchText.AsyncRe
         public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                        int viewType) {
             // create a new view
-            TextView v = (TextView) LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.list_layout_textview, parent, false);
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.list_item, parent, false);
             // set the view's size, margins, paddings and layout parameters
+
+
+
+            LinearLayout listItemLayout = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent,false);
 
             ViewHolder vh = new ViewHolder(v);
             return vh;
@@ -211,18 +224,28 @@ public class ResultsActivity extends Activity implements AsyncSearchText.AsyncRe
             // - replace the contents of the view with that element
             //holder.mTextView.setText(mDataset[position]);
 
-            if (mDataset[position].contains(endocrineKeyword)) {
-                holder.mTextView.setBackgroundColor(Color.RED);
+            List<String> tempList = Arrays.asList(mDataset[position].split("§_§"));
+            System.out.println("tempList: "+tempList+ ", Length: "+tempList.size());
 
-                holder.mTextView.setText(mDataset[position].replaceAll(endocrineKeyword, ""));
+            if (mDataset[position].contains(endocrineKeyword)) {
+                //holder.mConstraintLayout.setBackgroundColor(Color.RED);
+
+                holder.textViewHeader.setText(tempList.get(0).replaceAll(endocrineKeyword, ""));
+                holder.textViewSubHeader.setText(tempList.get(1));
 
             } else if (mDataset[position].contains(sensitiserKeyword)) {
-                holder.mTextView.setBackgroundColor(Color.YELLOW);
-                holder.mTextView.setText(mDataset[position].replaceAll(sensitiserKeyword, ""));
+                //holder.mConstraintLayout.setBackgroundColor(Color.YELLOW);
+
+
+                holder.textViewHeader.setText(tempList.get(0).replaceAll(sensitiserKeyword, ""));
+                holder.textViewSubHeader.setText(tempList.get(1));
+
+
             }
             else {
-                holder.mTextView.setBackgroundColor(Color.WHITE);
-                holder.mTextView.setText(mDataset[position]);
+                //holder.mConstraintLayout.setBackgroundColor(Color.WHITE);
+                holder.textViewHeader.setText(tempList.get(0));
+                holder.textViewSubHeader.setText(tempList.get(1));
             }
 
 

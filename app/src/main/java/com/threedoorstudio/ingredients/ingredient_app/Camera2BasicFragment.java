@@ -16,6 +16,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
@@ -169,6 +170,9 @@ public class Camera2BasicFragment extends Fragment
      */
     private AutoFitTextureView mTextureView;
 
+
+    private ImageView mMaskView;
+
     /**
      * A {@link CameraCaptureSession } for camera preview.
      */
@@ -186,6 +190,7 @@ public class Camera2BasicFragment extends Fragment
 
 
     private MeteringRectangle meteringRectangle[] = new MeteringRectangle[1];
+
 
     /**
      * {@link CameraDevice.StateCallback} is called when {@link CameraDevice} changes its state.
@@ -468,6 +473,9 @@ public class Camera2BasicFragment extends Fragment
         view.findViewById(R.id.picture).setOnClickListener(this);
 
         mTextureView = (AutoFitTextureView) view.findViewById(R.id.texture);
+
+        //mMaskView = view.findViewById(R.id.maskView);
+
     }
 
     @Override
@@ -636,6 +644,11 @@ public class Camera2BasicFragment extends Fragment
                 Size sensorSize = characteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE);
                 halfHeight = (sensorSize.getWidth()/2)-75;
                 halfWidth = (sensorSize.getHeight()/2)-75;
+
+                System.out.println("Sensor Size (width, height): "+sensorSize.getWidth()+ ",   "+sensorSize.getHeight());
+
+
+
 
                 meteringRectangle[0] = new MeteringRectangle(halfWidth, halfHeight, 150,150,MeteringRectangle.METERING_WEIGHT_MAX);
                 afRegions = characteristics.get(CONTROL_MAX_REGIONS_AF);
@@ -904,6 +917,7 @@ public class Camera2BasicFragment extends Fragment
             // Orientation
             int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, getOrientation(rotation));
+
 
             if (CameraCharacteristics.NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES != null) { //Probably not the best way to check the correct quality is present, but hey, it's better than nothing
 
